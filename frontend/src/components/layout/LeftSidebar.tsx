@@ -5,19 +5,38 @@ import UserIcon from '@/assets/icons/user-icon.png';
 import NearAIIcon from '@/assets/icons/near-icon-green.svg?react';
 import CloseIcon from '@/assets/icons/close-icon.svg?react';
 import PencilIcon from '@/assets/icons/pencil-icon.svg?react';
+import SettingsIcon from '@/assets/icons/settings-icon.svg?react';
+import ArchiveIcon from '@/assets/icons/archive-icon.svg?react';
+import SignOutIcon from '@/assets/icons/sign-out-icon.svg?react';
 import { useViewStore } from '@/stores/useViewStore';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger
+} from '../ui/dropdown-menu';
 
-const Sidebar: React.FC = () => {
+export const DropdownType = { Item: 'Item', Separator: 'Separator' } as const;
+
+const dropdownItems = [
+	{ title: 'Settings', icon: <SettingsIcon />, type: DropdownType.Item },
+	{ title: 'Archived Chats', icon: <ArchiveIcon />, type: DropdownType.Item },
+	{ type: DropdownType.Separator },
+	{ title: 'Sign Out', icon: <SignOutIcon />, type: DropdownType.Item }
+];
+
+const LeftSidebar: React.FC = () => {
 	const { isLeftSidebarOpen } = useViewStore();
 	const { user } = useUserStore();
 
 	return (
-		<nav className="shrink-0 bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-200 text-sm fixed z-50 top-0 left-0 overflow-x-hidden transition-width duration-200 ease-in-out">
+		<nav className="shrink-0 text-sm fixed z-50 top-0 left-0 overflow-x-hidden transition-width duration-200 ease-in-out">
 			<div
 				id="sidebar"
 				className={`h-screen max-h-[100dvh] min-h-screen select-none ${
 					isLeftSidebarOpen ? 'md:relative w-[260px] max-w-[260px]' : '-translate-x-[260px] w-[0px]'
-				}'transition-width duration-200 ease-in-out shrink-0 bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-200 text-sm fixed z-50 top-0 left-0 overflow-x-hidden
+				}' transition-width duration-200 ease-in-out shrink-0 bg-gray-900 text-gray-900 dark:bg-gray-900 dark:text-gray-200 text-sm fixed z-50 top-0 left-0 overflow-x-hidden
         `}
 			>
 				<div
@@ -64,16 +83,37 @@ const Sidebar: React.FC = () => {
 
 					{/* Bottom section */}
 					<div className="px-2">
-						<button className="flex items-center rounded-xl py-2.5 px-2.5 w-full transition">
-							<div className="self-center mr-3">
-								<img
-									src={UserIcon}
-									alt="User"
-									className="w-8 h-8 max-w-[30px] object-cover rounded-full"
-								/>
-							</div>
-							<div className="self-center font-medium">{user?.name}</div>
-						</button>
+						<DropdownMenu>
+							<DropdownMenuTrigger className="flex items-center outline-none ring-none rounded-xl py-2.5 px-2.5 w-full transition">
+								<>
+									<div className="self-center mr-3">
+										<img
+											src={UserIcon}
+											alt="User"
+											className="w-8 h-8 max-w-[30px] object-cover rounded-full"
+										/>
+									</div>
+									<div className="self-center font-medium">{user?.name}</div>
+								</>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent
+								className="w-full bg-white min-w-[240px] outline-none ring-none border-none"
+								loop
+								side="top"
+							>
+								{dropdownItems.map((el) => {
+									if (el.type === DropdownType.Separator) {
+										return <DropdownMenuSeparator className="border-gray-100" />;
+									} else {
+										return (
+											<DropdownMenuItem className="flex flex-row gap-2 py-2 px-3 hover:bg-gray-800">
+												{el.icon} {el.title}
+											</DropdownMenuItem>
+										);
+									}
+								})}
+							</DropdownMenuContent>
+						</DropdownMenu>
 					</div>
 				</div>
 			</div>
@@ -81,4 +121,4 @@ const Sidebar: React.FC = () => {
 	);
 };
 
-export default Sidebar;
+export default LeftSidebar;

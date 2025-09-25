@@ -1,5 +1,5 @@
 import React from 'react';
-import Sidebar from './Sidebar';
+import LeftSidebar from './LeftSidebar';
 import RightSidebar from './RightSidebar';
 
 interface LayoutProps {
@@ -11,7 +11,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
 	return (
 		<div className="flex flex-row h-screen w-full">
-			<Sidebar />
+			<LeftSidebar />
 			<div className="w-full flex-1 max-w-[calc(100%-260px)] ml-[260px] relative">
 				{children}
 				<RightSidebar
