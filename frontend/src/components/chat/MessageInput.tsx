@@ -524,7 +524,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
 			{/* Files Overlay */}
 			{dragged && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-					<div className="bg-white dark:bg-gray-900 rounded-lg p-8 text-center">
+					<div className="bg-gray-900 dark:bg-gray-900 rounded-lg p-8 text-center">
 						<div className="text-4xl mb-4">📁</div>
 						<div className="text-lg font-medium">Drop files here to upload</div>
 					</div>
@@ -534,7 +534,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
 			{/* Tool Servers Modal */}
 			{showTools && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-					<div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-md w-full mx-4">
+					<div className="bg-gray-900 dark:bg-gray-900 rounded-lg p-6 max-w-md w-full mx-4">
 						<h3 className="text-lg font-medium mb-4">Available Tools</h3>
 						<div className="space-y-2">
 							{selectedToolIds.map((toolId) => (
@@ -630,7 +630,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
 					</div>
 				</div>
 
-				<div className={transparentBackground ? 'bg-transparent' : 'bg-white dark:bg-gray-900'}>
+				<div className={transparentBackground ? 'bg-transparent' : 'bg-gray-900 dark:bg-gray-900'}>
 					<div
 						className={`${store.settings?.widescreenMode ? 'max-w-full' : 'max-w-6xl'} px-2.5 mx-auto inset-x-0`}
 					>

@@ -26,8 +26,8 @@ function App() {
 	}
 
 	return (
-		<div className="app relative bg-white dark:bg-mainBlack">
-			<div className="text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-900 h-screen max-h-[100dvh] w-full overflow-auto flex flex-row stretch grow-1">
+		<div className="app relative">
+			<div className="text-gray-700 dark:text-gray-100 h-screen max-h-[100dvh] w-full overflow-auto flex flex-row stretch grow-1">
 				<Layout>
 					<Routes>
 						<Route path="/" element={<Home />} />

@@ -318,3 +318,8 @@ pre[class*='language-'] button:hover {
 		@apply bg-background text-foreground;
 	}
 }
+
+.app-chat-input {
+	border: 1px solid rgba(0, 61, 39, 1);
+	background: linear-gradient(180deg, rgba(0, 236, 151, 0.02) 0%, rgba(0, 236, 151, 0.04) 100%);
+}
