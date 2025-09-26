@@ -5,6 +5,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App.tsx';
 import './index.css';
+import { initI18n } from './i18n';
+
+// Initialize i18n asynchronously
+initI18n(localStorage?.locale);
 
 // Create a client
 const queryClient = new QueryClient({
