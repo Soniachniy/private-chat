@@ -319,36 +319,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
 		});
 	};
 
-	const screenCaptureHandler = async () => {
-		try {
-			const mediaStream = await navigator.mediaDevices.getDisplayMedia({
-				video: true,
-				audio: false
-			});
-
-			const video = document.createElement('video');
-			video.srcObject = mediaStream;
-			await video.play();
-
-			const canvas = document.createElement('canvas');
-			canvas.width = video.videoWidth;
-			canvas.height = video.videoHeight;
-
-			const context = canvas.getContext('2d');
-			context?.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-			mediaStream.getTracks().forEach((track) => track.stop());
-			window.focus();
-
-			const imageUrl = canvas.toDataURL('image/png');
-			setFiles((prev) => [...prev, { type: 'image', url: imageUrl, name: 'screenshot.png' }]);
-
-			video.srcObject = null;
-		} catch (error) {
-			console.error('Error capturing screen:', error);
-		}
-	};
-
 	const uploadFileHandler = async (file: File, fullContext: boolean = false) => {
 		if (store.user?.role !== 'admin' && !(store.user?.permissions?.chat?.file_upload ?? true)) {
 			toast.error('You do not have permission to upload files.');
