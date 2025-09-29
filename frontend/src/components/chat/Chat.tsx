@@ -149,6 +149,7 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
 
 			{/* Message Input */}
 			<MessageInput
+				messages={messages}
 				onSendMessage={handleSendMessage}
 				isLoading={isLoading || isStreamingResponse}
 				disabled={createChatMutation.isPending}

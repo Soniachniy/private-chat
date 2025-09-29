@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { useUserStore } from '../../stores/useUserStore';
 import UserIcon from '@/assets/icons/user-icon.png';
@@ -52,18 +52,23 @@ const LeftSidebar: React.FC = () => {
 	const { user } = useUserStore();
 	const { chats, currentChatId } = useChatStore();
 
-	const chatsGroupedByFolder = Object.entries(
-		chats.reduce(
-			(acc, chat) => {
-				const timeRange = getTimeRange(chat.updated_at);
-				acc[timeRange] = [...(acc[timeRange] || []), chat];
-				return acc;
-			},
-			{} as Record<string, Chat[]>
-		)
+	const chatsGroupedByFolder = useMemo(
+		() =>
+			Object.entries(
+				chats.reduce(
+					(acc, chat) => {
+						const timeRange = getTimeRange(chat.updated_at);
+						acc[timeRange] = [...(acc[timeRange] || []), chat];
+						return acc;
+					},
+					{} as Record<string, Chat[]>
+				)
+			),
+		[chats]
 	);
 
 	const [isChatsOpen, setIsChatsOpen] = useState(false);
+
 	return (
 		<nav className="shrink-0 text-sm fixed z-50 top-0 left-0 overflow-x-hidden transition-width duration-200 ease-in-out">
 			<div
@@ -83,13 +88,13 @@ const LeftSidebar: React.FC = () => {
 						<div className="flex w-full justify-between my-4 px-2">
 							<button
 								type="button"
-								className="h-8 w-8 cursor-pointer shadow rounded flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-850 dark:bg-[rgba(248,248,248,0.04)]"
+								className="h-8 w-8 cursor-pointer shadow rounded flex items-center justify-center hover:bg-gray-850 dark:bg-[rgba(248,248,248,0.04)]"
 							>
 								<NearAIIcon />
 							</button>
 							<button
 								type="button"
-								className="text-white shadow hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-850 h-8 w-8 rounded flex items-center justify-center dark:bg-[rgba(248,248,248,0.04)] transition-colors"
+								className="text-white shadow dark:hover:text-gray-300 hover:bg-gray-850 h-8 w-8 rounded flex items-center justify-center dark:bg-[rgba(248,248,248,0.04)] transition-colors"
 							>
 								<CloseIcon />
 							</button>
@@ -157,7 +162,11 @@ const LeftSidebar: React.FC = () => {
 													</div>
 													<DropdownMenu>
 														<DropdownMenuTrigger>
-															<EllipsisHorizontal className="w-4 h-4" fill="white" stroke="white" />
+															<EllipsisHorizontal
+																className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"
+																fill="white"
+																stroke="white"
+															/>
 														</DropdownMenuTrigger>
 														<DropdownMenuContent
 															className="w-full bg-gray-875 min-w-[240px] outline-none ring-none border-none"

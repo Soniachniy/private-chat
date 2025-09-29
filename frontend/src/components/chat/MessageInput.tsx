@@ -1,7 +1,8 @@
+import type { Message } from '@/types';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { v4 as uuidv4 } from 'uuid';
-
+import HeadsetIcon from '@/assets/icons/headset.svg?react';
 // Types
 interface Model {
 	id: string;
@@ -48,6 +49,7 @@ interface History {
 }
 
 interface MessageInputProps {
+	messages?: Message[];
 	transparentBackground?: boolean;
 	onChange?: (data: {
 		prompt: string;
@@ -105,10 +107,9 @@ const useStore = () => ({
 	config: {
 		file: { max_size: 10 },
 		features: {
-			enable_autocomplete_generation: true,
 			enable_web_search: true,
-			enable_image_generation: true,
-			enable_code_interpreter: true
+			enable_autocomplete_generation: true,
+			enable_image_generation: false
 		},
 		audio: {
 			stt: { engine: 'web' }
@@ -157,6 +158,7 @@ const compressImage = async (imageUrl: string, _width?: number, _height?: number
 };
 
 const MessageInput: React.FC<MessageInputProps> = ({
+	messages,
 	transparentBackground = false,
 	onChange = () => {},
 	createMessagePair = () => {},
@@ -523,7 +525,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
 				</div>
 			)}
 
-			<div className="w-full font-primary">
+			<div className={`w-full font-primary ${messages?.length === 0 ? 'flex-1' : ''}`}>
 				<div className="mx-auto inset-x-0 bg-transparent flex justify-center">
 					<div
 						className={`flex flex-col px-3 ${store.settings?.widescreenMode ? 'max-w-full' : 'max-w-6xl'} w-full`}
@@ -902,81 +904,12 @@ const MessageInput: React.FC<MessageInputProps> = ({
 																		</span>
 																	</button>
 																)}
-
-															{store.config?.features?.enable_code_interpreter &&
-																(store.user.role === 'admin' ||
-																	store.user?.permissions?.features?.code_interpreter) && (
-																	<button
-																		onClick={() => {
-																			// Handle code interpreter toggle
-																		}}
-																		type="button"
-																		className={`px-1 py-0.5 flex gap-1.5 items-center text-sm rounded-full font-medium transition-colors duration-300 focus:outline-hidden max-w-full overflow-hidden border ${
-																			codeInterpreterEnabled
-																				? 'bg-gray-50 dark:bg-gray-400/10 border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-400'
-																				: 'bg-transparent border-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-																		}`}
-																	>
-																		<svg
-																			className="size-5"
-																			fill="none"
-																			stroke="currentColor"
-																			viewBox="0 0 24 24"
-																		>
-																			<path
-																				strokeLinecap="round"
-																				strokeLinejoin="round"
-																				strokeWidth={1.75}
-																				d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-																			/>
-																		</svg>
-																		<span className="hidden xl:block whitespace-nowrap overflow-hidden text-ellipsis translate-y-[0.5px]">
-																			Code Interpreter
-																		</span>
-																	</button>
-																)}
 														</>
 													)}
 												</div>
 											</div>
 
 											<div className="self-end flex space-x-1 mr-1 shrink-0">
-												{(!history?.currentId ||
-													history.messages[history.currentId]?.done === true) &&
-													(store.user?.role === 'admin' ||
-														(store.user?.permissions?.chat?.stt ?? true)) && (
-														<button
-															id="voice-input-button"
-															className="text-gray-600 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200 transition rounded-full p-1.5 mr-0.5 self-center"
-															type="button"
-															onClick={async () => {
-																try {
-																	const stream = await navigator.mediaDevices.getUserMedia({
-																		audio: true
-																	});
-																	if (stream) {
-																		setRecording(true);
-																		const tracks = stream.getTracks();
-																		tracks.forEach((track) => track.stop());
-																	}
-																} catch {
-																	toast.error('Permission denied when accessing microphone');
-																}
-															}}
-															aria-label="Voice Input"
-														>
-															<svg
-																xmlns="http://www.w3.org/2000/svg"
-																viewBox="0 0 20 20"
-																fill="currentColor"
-																className="w-5 h-5 translate-y-[0.5px]"
-															>
-																<path d="M7 4a3 3 0 016 0v6a3 3 0 11-6 0V4z" />
-																<path d="M5.5 9.643a.75.75 0 00-1.5 0V10c0 3.06 2.29 5.585 5.25 5.954V17.5h-1.5a.75.75 0 000 1.5h4.5a.75.75 0 000-1.5h-1.5v-1.546A6.001 6.001 0 0016 10v-.357a.75.75 0 00-1.5 0V10a4.5 4.5 0 01-9 0v-.357z" />
-															</svg>
-														</button>
-													)}
-
 												{(taskIds && taskIds.length > 0) ||
 												(history?.currentId &&
 													history.messages[history.currentId]?.done !== true) ? (
@@ -1030,21 +963,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
 														}}
 														aria-label="Call"
 													>
-														<svg
-															aria-hidden="true"
-															xmlns="http://www.w3.org/2000/svg"
-															fill="currentColor"
-															viewBox="0 0 24 24"
-															stroke-width="0"
-															stroke="currentColor"
-															className="size-5"
-														>
-															<path
-																fill-rule="evenodd"
-																d="M12 5a7 7 0 0 0-7 7v1.17c.313-.11.65-.17 1-.17h2a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H6a3 3 0 0 1-3-3v-6a9 9 0 0 1 18 0v6a3 3 0 0 1-3 3h-2a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h2c.35 0 .687.06 1 .17V12a7 7 0 0 0-7-7Z"
-																clip-rule="evenodd"
-															></path>
-														</svg>
+														<HeadsetIcon className="size-5" />
 													</button>
 												) : (
 													<button
