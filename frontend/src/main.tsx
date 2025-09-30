@@ -8,10 +8,8 @@ import './index.css';
 import { initI18n } from './i18n';
 import ThemeProvider from './components/common/ThemeProvider';
 
-// Initialize i18n asynchronously
 initI18n(localStorage?.locale);
 
-// Create a client
 const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
@@ -29,7 +27,6 @@ createRoot(document.getElementById('root')!).render(
 					<App />
 				</ThemeProvider>
 			</BrowserRouter>
-			{/* <ReactQueryDevtools initialIsOpen={false} /> */}
 		</QueryClientProvider>
 	</React.StrictMode>
 );

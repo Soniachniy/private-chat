@@ -48,7 +48,7 @@ const chatDropdownItems = [
 ];
 
 const LeftSidebar: React.FC = () => {
-	const { isLeftSidebarOpen } = useViewStore();
+	const { isLeftSidebarOpen, setIsLeftSidebarOpen } = useViewStore();
 	const { user } = useUserStore();
 	const { chats, currentChatId } = useChatStore();
 
@@ -90,11 +90,12 @@ const LeftSidebar: React.FC = () => {
 								type="button"
 								className="h-8 w-8 cursor-pointer shadow rounded flex items-center justify-center hover:bg-gray-850 dark:bg-[rgba(248,248,248,0.04)]"
 							>
-								<NearAIIcon />
+								<NearAIIcon className="w-4 h-4" />
 							</button>
 							<button
 								type="button"
 								className="text-white shadow dark:hover:text-gray-300 hover:bg-gray-850 h-8 w-8 rounded flex items-center justify-center dark:bg-[rgba(248,248,248,0.04)] transition-colors"
+								onClick={() => setIsLeftSidebarOpen(false)}
 							>
 								<CloseIcon />
 							</button>
@@ -143,7 +144,7 @@ const LeftSidebar: React.FC = () => {
 											{timeRange}
 										</div>
 										{chats.map((chat) => (
-											<div className="w-full  relative group" draggable="true">
+											<div className="w-full  relative group" key={chat.id} draggable="true">
 												<a
 													className={
 														`w-full flex justify-between rounded-lg px-[11px] py-[6px] whitespace-nowrap text-ellipsis` +

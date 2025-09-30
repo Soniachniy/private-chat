@@ -33,6 +33,14 @@ export interface Message {
 	timestamp: number;
 	model?: string;
 	metadata?: Record<string, unknown>;
+	parentId?: string | null;
+	childrenIds?: string[];
+	files?: File[];
+	originalContent?: string;
+	annotation?: {
+		rating?: number;
+		[key: string]: unknown;
+	};
 }
 
 // OpenAI API types
@@ -102,6 +110,17 @@ export interface Settings {
 	version: string;
 	directConnections?: unknown;
 	toolServers?: unknown[];
+	// MessageInput specific settings
+	imageCompression?: boolean;
+	imageCompressionSize?: {
+		width?: number;
+		height?: number;
+	};
+	widescreenMode?: boolean;
+	chatDirection?: 'ltr' | 'rtl' | 'auto';
+	richTextInput?: boolean;
+	ctrlEnterToSend?: boolean;
+	largeTextAsFile?: boolean;
 }
 
 // Config types
@@ -153,6 +172,8 @@ export interface UserStore {
 }
 
 export interface ViewStore {
+	isMobile: boolean;
+	setIsMobile: (isMobile: boolean) => void;
 	isLeftSidebarOpen: boolean;
 	setIsLeftSidebarOpen: (isOpen: boolean) => void;
 }
@@ -172,4 +193,20 @@ export interface ChatStore {
 export interface SettingsStore {
 	settings: Settings;
 	setSettings: (settings: Partial<Settings>) => void;
+}
+
+// Chat History types
+export interface ChatHistory {
+	messages: Record<string, Message>;
+	currentId: string | null;
+}
+
+// File types
+export interface File {
+	id: string;
+	name: string;
+	size: number;
+	type: string;
+	url?: string;
+	content?: string;
 }

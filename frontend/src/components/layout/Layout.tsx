@@ -1,6 +1,8 @@
 import React from 'react';
 import LeftSidebar from './LeftSidebar';
 import RightSidebar from './RightSidebar';
+import { useViewStore } from '@/stores/useViewStore';
+import { cn } from '@/lib/utils';
 
 interface LayoutProps {
 	children: React.ReactNode;
@@ -8,11 +10,17 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
 	const [showRight, setShowRight] = React.useState(false);
+	const { isLeftSidebarOpen, isMobile } = useViewStore();
 
 	return (
 		<div className="flex flex-row h-screen w-full">
 			<LeftSidebar />
-			<div className="w-full flex-1 max-w-[calc(100%-260px)] ml-[260px] relative">
+			<div
+				className={cn(
+					'w-full flex-1 relative',
+					!isMobile && isLeftSidebarOpen && 'max-w-[calc(100%-260px)] ml-[260px]'
+				)}
+			>
 				{children}
 				<RightSidebar
 					show={showRight}
