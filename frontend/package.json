@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+		"@noble/hashes": "^1.8.0",
+		"@noble/secp256k1": "^2.3.0",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/typography": "^0.5.18",

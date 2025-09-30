@@ -33,6 +33,14 @@ export interface Message {
 	timestamp: number;
 	model?: string;
 	metadata?: Record<string, unknown>;
+	chatCompletionId?: string;
+	done?: boolean;
+}
+
+// Chat history in tree format (like in Svelte version)
+export interface ChatHistory {
+	messages: Record<string, Message>;
+	currentId: string | null;
 }
 
 // OpenAI API types
