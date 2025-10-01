@@ -145,7 +145,7 @@ const MarkdownTokens: React.FC<MarkdownTokensProps> = ({ tokens, id, top = false
 												<th
 													key={`${key}-header-${headerIdx}`}
 													scope="col"
-													className="!px-3 !py-1.5 border border-gray-100 dark:border-gray-850"
+													className="px-3! py-1.5! border border-gray-100 dark:border-gray-850"
 												>
 													<MarkdownInlineTokens
 														tokens={header.tokens}
@@ -164,7 +164,7 @@ const MarkdownTokens: React.FC<MarkdownTokensProps> = ({ tokens, id, top = false
 												{row?.map((cell: Tokens.TableCell, cellIdx: number) => (
 													<td
 														key={`${key}-row-${rowIdx}-${cellIdx}`}
-														className="!px-3 !py-1.5 text-gray-900 dark:text-white border border-gray-100 dark:border-gray-850"
+														className="px-3! py-1.5! text-gray-900 dark:text-white border border-gray-100 dark:border-gray-850"
 													>
 														<MarkdownInlineTokens
 															tokens={cell.tokens}

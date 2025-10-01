@@ -67,7 +67,7 @@ const LeftSidebar: React.FC = () => {
 		[chats]
 	);
 
-	const [isChatsOpen, setIsChatsOpen] = useState(false);
+	const [isChatsOpen, setIsChatsOpen] = useState(true);
 
 	return (
 		<nav className="shrink-0 text-sm z-50 top-0 left-0 overflow-x-hidden transition-width duration-200 ease-in-out">
