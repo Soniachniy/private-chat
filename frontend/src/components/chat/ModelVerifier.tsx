@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'react-hot-toast';
-import { 
-	XMarkIcon, 
-	CheckIcon, 
+import { toast } from 'sonner';
+import {
+	XMarkIcon,
+	CheckIcon,
 	ClipboardDocumentIcon,
 	ChevronDownIcon,
 	ArrowPathIcon,
@@ -40,7 +40,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 	show,
 	autoVerify = false,
 	onClose,
-	onStatusUpdate,
+	onStatusUpdate
 }) => {
 	const { t } = useTranslation();
 	const [loading, setLoading] = useState(false);
@@ -51,7 +51,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 	const [intelQuote, setIntelQuote] = useState<string | null>(null);
 	const [expandedSections, setExpandedSections] = useState<ExpandedSections>({
 		gpu: false,
-		tdx: false,
+		tdx: false
 	});
 	const [checkedMap, setCheckedMap] = useState<CheckedMap>({});
 
@@ -65,7 +65,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 		try {
 			const data = await getModelAttestationReport({
 				token,
-				model,
+				model
 			});
 			setAttestationData(data);
 			setNvidiaPayload(JSON.parse(data?.nvidia_payload || '{}'));
@@ -92,9 +92,9 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 
 	// Toggle section expansion
 	const toggleSection = (section: 'gpu' | 'tdx') => {
-		setExpandedSections(prev => ({
+		setExpandedSections((prev) => ({
 			...prev,
-			[section]: !prev[section],
+			[section]: !prev[section]
 		}));
 	};
 
@@ -103,7 +103,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 		const success = await copyToClipboard(text);
 		if (success) {
 			toast.success(t('Copied to clipboard'));
-			setCheckedMap(prev => ({ ...prev, [key]: true }));
+			setCheckedMap((prev) => ({ ...prev, [key]: true }));
 		}
 	};
 
@@ -115,12 +115,15 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 	};
 
 	// Verification status for parent components
-	const verificationStatus: VerificationStatus = useMemo(() => ({
-		loading,
-		error,
-		data: attestationData,
-		isVerified: !loading && !error && attestationData !== null,
-	}), [loading, error, attestationData]);
+	const verificationStatus: VerificationStatus = useMemo(
+		() => ({
+			loading,
+			error,
+			data: attestationData,
+			isVerified: !loading && !error && attestationData !== null
+		}),
+		[loading, error, attestationData]
+	);
 
 	// Dispatch verification status updates
 	useEffect(() => {
@@ -202,15 +205,17 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 
 					{/* Description */}
 					<p className="text-gray-700 dark:text-gray-300 mb-6">
-						This automated verification tool lets you independently confirm that the model is running
-						in the TEE (Trusted Execution Environment).
+						This automated verification tool lets you independently confirm that the model is
+						running in the TEE (Trusted Execution Environment).
 					</p>
 
 					{/* Loading State */}
 					{loading && (
 						<div className="flex items-center justify-center py-8">
 							<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[rgba(0,236,151,1)]"></div>
-							<span className="ml-3 text-gray-600 dark:text-gray-400">Verifying attestation...</span>
+							<span className="ml-3 text-gray-600 dark:text-gray-400">
+								Verifying attestation...
+							</span>
 						</div>
 					)}
 
@@ -237,7 +242,9 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 										<div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
 											<CheckIcon className="w-4 h-4 text-white" />
 										</div>
-										<span className="font-medium text-gray-900 dark:text-white">GPU Attestation</span>
+										<span className="font-medium text-gray-900 dark:text-white">
+											GPU Attestation
+										</span>
 									</div>
 									<ChevronDownIcon
 										className={`w-5 h-5 text-gray-400 transform transition-transform ${
@@ -391,7 +398,9 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 										<div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
 											<CheckIcon className="w-4 h-4 text-white" />
 										</div>
-										<span className="font-medium text-gray-900 dark:text-white">TDX Attestation</span>
+										<span className="font-medium text-gray-900 dark:text-white">
+											TDX Attestation
+										</span>
 									</div>
 									<ChevronDownIcon
 										className={`w-5 h-5 text-gray-400 transform transition-transform ${
@@ -412,10 +421,10 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 													</span>
 												</div>
 												<p className="text-xs text-green-800 dark:text-green-200 mb-3">
-													Intel TDX (Trust Domain Extensions) provides hardware-based attestation for
-													confidential computing. You can verify the authenticity of this TDX quote
-													using Phala's TEE Attestation Explorer - an open source tool for analyzing
-													Intel attestation reports.
+													Intel TDX (Trust Domain Extensions) provides hardware-based attestation
+													for confidential computing. You can verify the authenticity of this TDX
+													quote using Phala's TEE Attestation Explorer - an open source tool for
+													analyzing Intel attestation reports.
 												</p>
 												<div className="space-y-1">
 													<a

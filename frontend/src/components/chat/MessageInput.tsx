@@ -1,6 +1,6 @@
 import type { Message } from '@/types';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 import HeadsetIcon from '@/assets/icons/headset.svg?react';
 import { useUserStore } from '@/stores/useUserStore';

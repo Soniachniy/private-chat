@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import type { Message, ChatHistory } from '@/types';
 import ResponseMessage from './ResponseMessage';
 

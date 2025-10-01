@@ -2,6 +2,8 @@ import React from 'react';
 import DOMPurify from 'dompurify';
 import type { Token } from 'marked';
 import CodeBlock from './CodeBlock';
+import { copyToClipboard } from '@/lib';
+import { toast } from 'sonner';
 
 interface MarkdownTokensProps {
 	tokens: Token[];
@@ -11,6 +13,7 @@ interface MarkdownTokensProps {
 
 const unescapeHtml = (html: string): string => {
 	const doc = new DOMParser().parseFromString(html, 'text/html');
+	console.log('doc', doc);
 	return doc.documentElement.textContent || '';
 };
 
@@ -63,7 +66,14 @@ const MarkdownInlineTokens: React.FC<{ tokens: Token[]; id: string }> = ({ token
 
 				if (token.type === 'codespan') {
 					return (
-						<code key={key} className="codespan bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded">
+						<code
+							key={key}
+							onClick={() => {
+								copyToClipboard(unescapeHtml(token.text));
+								toast.success('Copied to clipboard');
+							}}
+							className="codespan cursor-pointer"
+						>
 							{unescapeHtml(token.text)}
 						</code>
 					);

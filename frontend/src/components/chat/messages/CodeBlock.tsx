@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github-dark.min.css';
 import CodeEditor from '@/components/common/CodeEditor';

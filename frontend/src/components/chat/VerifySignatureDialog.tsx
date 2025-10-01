@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { XMarkIcon, CheckIcon, ClipboardIcon } from '@heroicons/react/24/outline';
 import { copyToClipboard } from '@/lib/index';
 import { verifySignature } from '@/lib/signature';
@@ -20,7 +20,7 @@ const VerifySignatureDialog: React.FC<VerifySignatureDialogProps> = ({
 	address,
 	message,
 	signature,
-	onClose,
+	onClose
 }) => {
 	const { t } = useTranslation();
 	const [verifyStatus, setVerifyStatus] = useState<VerifyStatus>('pending');
@@ -46,7 +46,7 @@ const VerifySignatureDialog: React.FC<VerifySignatureDialogProps> = ({
 		const success = await copyToClipboard(text);
 		if (success) {
 			toast.success(t('Copied to clipboard'));
-			setCheckedMap(prev => ({ ...prev, [key]: true }));
+			setCheckedMap((prev) => ({ ...prev, [key]: true }));
 		}
 	};
 
@@ -86,8 +86,8 @@ const VerifySignatureDialog: React.FC<VerifySignatureDialogProps> = ({
 					{verifyStatus === 'success' && (
 						<div className="mb-4 py-2 px-2.5 text-green-700 dark:text-green-300 bg-green-50 dark:bg-[rgba(0,236,151,0.08)] border border-green-200 dark:border-[rgba(0,236,151,0.08)] rounded-lg text-sm">
 							<CheckIcon className="w-5 h-5 text-green-500 dark:text-[rgba(0,236,151,1)] mr-0.5 inline-block" />
-							Message Signature Verified. The message signature has been confirmed to be signed by the
-							address using the
+							Message Signature Verified. The message signature has been confirmed to be signed by
+							the address using the
 							<a
 								className="text-blue-500 underline"
 								href="https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm"

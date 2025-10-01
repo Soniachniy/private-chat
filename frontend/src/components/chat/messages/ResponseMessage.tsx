@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import type { ChatHistory } from '@/types';
 import NearAIIcon from '@/assets/images/near-icon.svg?react';
 import { useSettingsStore } from '@/stores/useSettingsStore';
