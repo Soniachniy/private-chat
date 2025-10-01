@@ -171,55 +171,12 @@ const Home: React.FC = () => {
 		}
 	};
 
-	const handleRateMessage = (messageId: string, rating: number) => {
-		console.log('Rate message:', messageId, rating);
-		if (currentChatId) {
-			updateChat(currentChatId, {
-				messages: messages.map((msg) =>
-					msg.id === messageId ? { ...msg, annotation: { ...msg.annotation, rating } } : msg
-				)
-			});
-		}
-	};
-
-	const handleActionMessage = (messageId: string, action: string) => {
-		console.log('Action message:', messageId, action);
-	};
-
-	const handleSubmitMessage = (content: string) => {
-		handleSendMessage(content);
-	};
-
-	const handleContinueResponse = () => {
-		console.log('Continue response');
-	};
-
 	const handleRegenerateResponse = () => {
 		console.log('Regenerate response');
 	};
 
 	const handleMergeResponses = () => {
 		console.log('Merge responses');
-	};
-
-	const handleAddMessages = (newMessages: Message[]) => {
-		console.log('Add messages:', newMessages);
-		if (currentChatId) {
-			updateChat(currentChatId, {
-				messages: [...messages, ...newMessages]
-			});
-		}
-	};
-
-	const handleTriggerScroll = () => {
-		console.log('Trigger scroll');
-	};
-
-	const handleUpdateChat = (
-		chatId: string,
-		updates: Partial<{ messages: Message[]; updated_at: number; title?: string }>
-	) => {
-		updateChat(chatId, updates);
 	};
 
 	if (isChatLoading) {
@@ -382,24 +339,15 @@ const Home: React.FC = () => {
 							return (
 								<MultiResponseMessages
 									key={message.id}
-									chatId={currentChatId || ''}
 									history={mockHistory}
 									messageId={message.id}
 									isLastMessage={idx === messages.length - 1}
 									readOnly={false}
 									webSearchEnabled={false}
-									updateChat={handleUpdateChat}
-									editMessage={handleEditMessage}
 									saveMessage={handleSaveMessage}
-									rateMessage={handleRateMessage}
-									actionMessage={handleActionMessage}
-									submitMessage={handleSubmitMessage}
 									deleteMessage={handleDeleteMessage}
-									continueResponse={handleContinueResponse}
 									regenerateResponse={handleRegenerateResponse}
 									mergeResponses={handleMergeResponses}
-									addMessages={handleAddMessages}
-									triggerScroll={handleTriggerScroll}
 								/>
 							);
 						} else {
