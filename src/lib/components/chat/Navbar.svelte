@@ -141,40 +141,6 @@
 						</Menu>
 					{/if}
 
-					<!-- <Tooltip content={$i18n.t('Controls')}>
-						<button
-							class=" flex cursor-pointer px-2 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-850 transition"
-							on:click={async () => {
-								await showControls.set(!$showControls);
-							}}
-							aria-label="Controls"
-						>
-							<div class=" m-auto self-center">
-								<AdjustmentsHorizontal className=" size-5" strokeWidth="0.5" />
-							</div>
-						</button>
-					</Tooltip> -->
-
-					<!-- <Tooltip content={$i18n.t('New Chat')}>
-						<button
-							id="new-chat-button"
-							class=" flex {$showSidebar
-								? 'md:hidden'
-								: ''} cursor-pointer px-2 py-2 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-850 transition"
-							on:click={() => {
-								initNewChat();
-							}}
-							aria-label="New Chat"
-						>
-							<div class=" m-auto self-center">
-								<PencilSquare className=" size-5" strokeWidth="2" />
-							</div>
-						</button>
-					</Tooltip> -->
-
-					<!-- mobile button -->
-					<!-- <AccountButton buttonClass="md:hidden!" /> -->
-
 					<button
 						on:click={toggleVerifier}
 						class="p-1.5 text-white rounded-xl hover:bg-gray-50 dark:hover:bg-gray-850 transition-all duration-200
@@ -187,53 +153,4 @@
 			</div>
 		</div>
 	</div>
-
-	{#if !history.currentId && !$chatId && ($banners.length > 0 || ($config?.license_metadata?.type ?? null) === 'trial' || (($config?.license_metadata?.seats ?? null) !== null && $config?.user_count > $config?.license_metadata?.seats))}
-		<div class=" w-full z-30 mt-5">
-			<div class=" flex flex-col gap-1 w-full">
-				{#if ($config?.license_metadata?.type ?? null) === 'trial'}
-					<Banner
-						banner={{
-							type: 'info',
-							title: 'Trial License',
-							content: $i18n.t(
-								'You are currently using a trial license. Please contact support to upgrade your license.'
-							)
-						}}
-					/>
-				{/if}
-
-				{#if ($config?.license_metadata?.seats ?? null) !== null && $config?.user_count > $config?.license_metadata?.seats}
-					<Banner
-						banner={{
-							type: 'error',
-							title: 'License Error',
-							content: $i18n.t(
-								'Exceeded the number of seats in your license. Please contact support to increase the number of seats.'
-							)
-						}}
-					/>
-				{/if}
-
-				{#each $banners.filter( (b) => (b.dismissible ? !JSON.parse(localStorage.getItem('dismissedBannerIds') ?? '[]').includes(b.id) : true) ) as banner}
-					<Banner
-						{banner}
-						on:dismiss={(e) => {
-							const bannerId = e.detail;
-
-							localStorage.setItem(
-								'dismissedBannerIds',
-								JSON.stringify(
-									[
-										bannerId,
-										...JSON.parse(localStorage.getItem('dismissedBannerIds') ?? '[]')
-									].filter((id) => $banners.find((b) => b.id === id))
-								)
-							);
-						}}
-					/>
-				{/each}
-			</div>
-		</div>
-	{/if}
 </nav>

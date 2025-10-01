@@ -5,7 +5,7 @@ export const useChatStore = create<ChatStore>((set) => ({
 	chats: [],
 	currentChatId: null,
 	isLoading: false,
-
+	models: ['gpt-oss-120b', 'deepseek-v3.1', 'qwen3-30b-a3b-instruct-2507'],
 	setChats: (chats: Chat[]) => set({ chats }),
 
 	setCurrentChatId: (id: string | null) => set({ currentChatId: id }),

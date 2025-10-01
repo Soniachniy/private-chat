@@ -8,7 +8,9 @@ export const useViewStore = create<ViewStore>()(
 			isMobile: false,
 			setIsMobile: (isMobile: boolean) => set({ isMobile }),
 			isLeftSidebarOpen: true,
-			setIsLeftSidebarOpen: (isOpen: boolean) => set({ isLeftSidebarOpen: isOpen })
+			setIsLeftSidebarOpen: (isOpen: boolean) => set({ isLeftSidebarOpen: isOpen }),
+			isRightSidebarOpen: false,
+			setIsRightSidebarOpen: (isOpen: boolean) => set({ isRightSidebarOpen: isOpen })
 		}),
 		{
 			name: 'view-storage',

@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import LoadingScreen from './components/common/LoadingScreen';
 import WelcomePage from './pages/WelcomePage';
 import AuthPage from './pages/AuthPage';
+import MarkdownTest from './pages/MarkdownTest';
 
 import { useAppInitialization } from './stores/useAppInitialization';
 import { useChats } from './hooks/useChat';
@@ -45,6 +46,7 @@ function App() {
 
 				<Route path="/welcome" element={<WelcomePage />} />
 				<Route path="/auth" element={<AuthPage />} />
+				<Route path="/markdown-test" element={<MarkdownTest />} />
 			</Routes>
 		</div>
 	);

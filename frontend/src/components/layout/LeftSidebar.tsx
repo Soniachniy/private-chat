@@ -70,10 +70,10 @@ const LeftSidebar: React.FC = () => {
 	const [isChatsOpen, setIsChatsOpen] = useState(false);
 
 	return (
-		<nav className="shrink-0 text-sm fixed z-50 top-0 left-0 overflow-x-hidden transition-width duration-200 ease-in-out">
+		<nav className="shrink-0 text-sm z-50 top-0 left-0 overflow-x-hidden transition-width duration-200 ease-in-out">
 			<div
 				id="sidebar"
-				className={`h-screen max-h-[100dvh] min-h-screen select-none ${
+				className={`h-screen max-h-[100dvh] min-h-screen fixed select-none ${
 					isLeftSidebarOpen ? 'md:relative w-[260px] max-w-[260px]' : '-translate-x-[260px] w-[0px]'
 				}' transition-width duration-200 ease-in-out shrink-0 bg-gray-900 text-gray-900 dark:bg-gray-900 dark:text-gray-200 text-sm fixed z-50 top-0 left-0 overflow-x-hidden
         `}

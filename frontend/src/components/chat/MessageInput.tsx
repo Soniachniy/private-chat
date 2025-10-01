@@ -5,7 +5,10 @@ import { v4 as uuidv4 } from 'uuid';
 import HeadsetIcon from '@/assets/icons/headset.svg?react';
 import { useUserStore } from '@/stores/useUserStore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
-// Types
+import UserIcon from '@/assets/icons/user-icon.png';
+import { cn } from '@/lib/utils';
+import { useViewStore } from '@/stores/useViewStore';
+
 interface Model {
 	id: string;
 	name: string;
@@ -141,7 +144,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
 		initialImageGenerationEnabled
 	);
 	const [webSearchEnabled, setWebSearchEnabled] = useState(initialWebSearchEnabled);
-
+	const { isLeftSidebarOpen, isMobile } = useViewStore();
 	const filesInputRef = useRef<HTMLInputElement>(null);
 	const chatInputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -350,7 +353,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
 
 		if (e.key === 'Escape') {
 			stopResponse();
-			setAtSelectedModel(undefined);
+			setAtSelectedModel();
 			setSelectedToolIds([]);
 			setWebSearchEnabled(false);
 			setImageGenerationEnabled(false);
@@ -462,29 +465,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
 				</div>
 			)}
 
-			{/* Tool Servers Modal */}
-			{showTools && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-					<div className="bg-gray-900 dark:bg-gray-900 rounded-lg p-6 max-w-md w-full mx-4">
-						<h3 className="text-lg font-medium mb-4">Available Tools</h3>
-						<div className="space-y-2">
-							{selectedToolIds.map((toolId) => (
-								<div key={toolId} className="p-2 bg-gray-100 dark:bg-gray-800 rounded">
-									{toolId}
-								</div>
-							))}
-						</div>
-						<button
-							onClick={() => setShowTools(false)}
-							className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-						>
-							Close
-						</button>
-					</div>
-				</div>
-			)}
-
-			<div className={`w-full font-primary ${messages?.length === 0 ? 'flex-1' : ''}`}>
+			<div className={`w-full font-primary flex-row ${messages?.length === 0 ? 'flex-1' : ''}`}>
 				<div className="mx-auto inset-x-0 bg-transparent flex justify-center">
 					<div
 						className={`flex flex-col px-3 ${settings.widescreenMode ? 'max-w-full' : 'max-w-6xl'} w-full`}
@@ -539,7 +520,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
 											<div>
 												<button
 													className="flex items-center dark:text-gray-500"
-													onClick={() => setAtSelectedModel(undefined)}
+													onClick={() => setAtSelectedModel()}
 												>
 													<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
 														<path
@@ -558,9 +539,31 @@ const MessageInput: React.FC<MessageInputProps> = ({
 					</div>
 				</div>
 
-				<div className={transparentBackground ? 'bg-transparent' : 'bg-gray-900 dark:bg-gray-900'}>
+				<div
+					className={cn(
+						transparentBackground ? 'bg-transparent' : 'bg-gray-900 dark:bg-gray-900',
+						'flex flex-row items-center pb-[1rem] flex items-center md:pl-2.5'
+					)}
+				>
+					{!isMobile && !isLeftSidebarOpen && (
+						<div>
+							<button
+								className="select-none flex rounded-xl p-1.5 hover:bg-gray-50 dark:hover:bg-gray-850 transition"
+								aria-label="User Menu"
+							>
+								<div className=" self-center">
+									<img
+										src={UserIcon}
+										className="size-7.5 object-cover rounded-full"
+										alt="User profile"
+										draggable="false"
+									/>
+								</div>
+							</button>
+						</div>
+					)}
 					<div
-						className={`${settings.widescreenMode ? 'max-w-full' : 'max-w-6xl'} px-2.5 mx-auto inset-x-0`}
+						className={`${settings.widescreenMode ? 'max-w-full' : 'max-w-6xl'}w-full px-2.5 mx-auto flex-1 grow inset-x-0`}
 					>
 						<div className="">
 							<input

@@ -129,6 +129,7 @@ export interface Settings {
 	richTextInput?: boolean;
 	ctrlEnterToSend?: boolean;
 	largeTextAsFile?: boolean;
+	chatBubble?: boolean;
 }
 
 // Config types
@@ -184,12 +185,15 @@ export interface ViewStore {
 	setIsMobile: (isMobile: boolean) => void;
 	isLeftSidebarOpen: boolean;
 	setIsLeftSidebarOpen: (isOpen: boolean) => void;
+	isRightSidebarOpen: boolean;
+	setIsRightSidebarOpen: (isOpen: boolean) => void;
 }
 
 export interface ChatStore {
 	chats: Chat[];
 	currentChatId: string | null;
 	isLoading: boolean;
+	models: string[];
 	setChats: (chats: Chat[]) => void;
 	setCurrentChatId: (id: string | null) => void;
 	addChat: (chat: Chat) => void;

@@ -6,7 +6,8 @@ const defaultSettings: Settings = {
 	theme: 'dark',
 	notificationEnabled: false,
 	showChangelog: true,
-	version: '0.6.5'
+	version: '0.6.5',
+	chatBubble: true
 };
 
 export const useSettingsStore = create<SettingsStore>()(
