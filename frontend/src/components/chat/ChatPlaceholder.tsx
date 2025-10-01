@@ -6,6 +6,7 @@ import HeadsetIcon from '@/assets/icons/headset.svg?react';
 import Fuse from 'fuse.js';
 
 import { allPrompts } from '@/pages/welcome/data';
+import Navbar from './Navbar';
 
 interface Prompt {
 	title: string[];
@@ -62,6 +63,7 @@ const ChatPlaceholder: React.FC<ChatPlaceholderProps> = ({ submitPrompt, submitV
 
 	return (
 		<div className="w-full h-full flex flex-col">
+			<Navbar />
 			<div className="m-auto w-full max-w-6xl px-2 2xl:px-20 translate-y-6 py-24 text-center">
 				<div className="w-full text-3xl text-gray-800 dark:text-gray-100 text-center flex items-center gap-4 font-primary">
 					<div className="w-full flex flex-col justify-center items-center">
