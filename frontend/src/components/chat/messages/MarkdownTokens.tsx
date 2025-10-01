@@ -5,16 +5,12 @@ import CodeBlock from './CodeBlock';
 import { copyToClipboard } from '@/lib';
 import { toast } from 'sonner';
 import KatexRenderer from './KatexRenderer';
-import { decode } from 'he';
+import { unescapeHtml } from '@/lib/utils/markdown';
 
 interface MarkdownTokensProps {
 	tokens: Token[];
 	id: string;
 	top?: boolean; // Controls whether text tokens render as <p> tags
-}
-
-function unescapeHtml(html: string): string {
-	return decode(html);
 }
 
 const MarkdownInlineTokens: React.FC<{ tokens?: Token[]; id: string }> = ({ tokens, id }) => {
