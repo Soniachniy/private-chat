@@ -214,6 +214,7 @@ export class OpenAIClient {
 	constructor(apiKey: string = '', baseURL: string = API_BASE_URL) {
 		this.apiKey = apiKey;
 		this.baseURL = baseURL;
+		console.log('OpenAIClient constructor', this.apiKey, this.baseURL);
 	}
 
 	async createChatCompletion(request: ChatCompletionRequest): Promise<ChatCompletionResponse> {

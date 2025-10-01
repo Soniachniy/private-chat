@@ -1,48 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import type { Message, ChatHistory } from '@/types';
+import type { ChatHistory } from '@/types';
 import ResponseMessage from './ResponseMessage';
 
 interface MultiResponseMessagesProps {
-	chatId: string;
 	history: ChatHistory;
 	messageId: string;
 	isLastMessage: boolean;
 	readOnly: boolean;
 	webSearchEnabled: boolean;
-	updateChat: (chatId: string, updates: any) => void;
-	editMessage: (messageId: string, content: string) => void;
 	saveMessage: (messageId: string, content: string) => void;
-	rateMessage: (messageId: string, rating: number) => void;
-	actionMessage: (messageId: string, action: string) => void;
-	submitMessage: (content: string) => void;
 	deleteMessage: (messageId: string) => void;
-	continueResponse: () => void;
 	regenerateResponse: () => void;
 	mergeResponses: () => void;
-	addMessages: (messages: Message[]) => void;
-	triggerScroll: () => void;
 }
 
 const MultiResponseMessages: React.FC<MultiResponseMessagesProps> = ({
-	chatId,
 	history,
 	messageId,
 	isLastMessage,
 	readOnly,
 	webSearchEnabled,
-	updateChat,
-	editMessage,
+
 	saveMessage,
-	rateMessage,
-	actionMessage,
-	submitMessage,
+
 	deleteMessage,
-	continueResponse,
+
 	regenerateResponse,
-	mergeResponses,
-	addMessages,
-	triggerScroll
+	mergeResponses
 }) => {
 	const [currentMessageId, setCurrentMessageId] = useState<string | null>(null);
 	const [showMergeDialog, setShowMergeDialog] = useState(false);
@@ -120,36 +105,15 @@ const MultiResponseMessages: React.FC<MultiResponseMessagesProps> = ({
 			{/* Current Response */}
 			{currentMessageId && (
 				<ResponseMessage
-					chatId={chatId}
 					history={history}
 					messageId={currentMessageId}
 					siblings={responses.map((r) => r.id)}
 					isLastMessage={isLastMessage}
 					readOnly={readOnly}
 					webSearchEnabled={webSearchEnabled}
-					gotoMessage={() => {}}
-					showPreviousMessage={() => {
-						const currentIndex = responses.findIndex((r) => r.id === currentMessageId);
-						if (currentIndex > 0) {
-							setCurrentMessageId(responses[currentIndex - 1].id);
-						}
-					}}
-					showNextMessage={() => {
-						const currentIndex = responses.findIndex((r) => r.id === currentMessageId);
-						if (currentIndex < responses.length - 1) {
-							setCurrentMessageId(responses[currentIndex + 1].id);
-						}
-					}}
-					updateChat={updateChat}
-					editMessage={editMessage}
 					saveMessage={saveMessage}
-					rateMessage={rateMessage}
-					actionMessage={actionMessage}
-					submitMessage={submitMessage}
 					deleteMessage={deleteMessage}
-					continueResponse={continueResponse}
 					regenerateResponse={regenerateResponse}
-					addMessages={addMessages}
 				/>
 			)}
 

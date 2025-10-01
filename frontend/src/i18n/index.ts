@@ -5,14 +5,13 @@ import { initReactI18next } from 'react-i18next';
 import enUS from './locales/en-US/translation.json';
 import languages from './locales/languages.json';
 
-declare module "i18next" {
-  interface CustomTypeOptions {
-    defaultNS: "translation";
-    resources: {
-      translation: typeof enUS;
-    };
-  }
-
+declare module 'i18next' {
+	interface CustomTypeOptions {
+		defaultNS: 'translation';
+		resources: {
+			translation: typeof enUS;
+		};
+	}
 }
 
 // Dynamic language loading function
@@ -34,10 +33,10 @@ export const initI18n = async (defaultLocale?: string | undefined) => {
 
 	// Load all available language resources
 	const resources: Record<string, { translation: typeof enUS }> = {};
-	
+
 	// Always load English as fallback
 	resources['en-US'] = { translation: enUS };
-	
+
 	// Load all other languages
 	for (const lang of languages) {
 		if (lang.code !== 'en-US') {
@@ -71,7 +70,7 @@ export const initI18n = async (defaultLocale?: string | undefined) => {
 			keySeparator: false,
 			nsSeparator: false,
 			missingKeyHandler: (lng: readonly string[], ns: string, key: string) => {
-				console.error(`Missing translation key: ${key} for language: ${lng.join(',')}`);
+				console.error(`Missing translation key: ${key + ns} for language: ${lng.join(',')}`);
 			},
 			interpolation: {
 				escapeValue: false

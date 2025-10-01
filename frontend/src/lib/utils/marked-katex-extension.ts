@@ -93,7 +93,7 @@ function katexStart(src: string, displayMode: boolean) {
 	}
 }
 
-function katexTokenizer(src: string, tokens: Token[], displayMode: boolean) {
+function katexTokenizer(src: string, displayMode: boolean) {
 	const ruleReg = displayMode ? blockRule : inlineRule;
 	const type = displayMode ? 'blockKatex' : 'inlineKatex';
 
@@ -121,8 +121,8 @@ function inlineKatex() {
 		start(src: string) {
 			return katexStart(src, false);
 		},
-		tokenizer(src: string, tokens: Token[]) {
-			return katexTokenizer(src, tokens, false);
+		tokenizer(src: string) {
+			return katexTokenizer(src, false);
 		},
 		renderer(token: Token) {
 			return `${token?.raw ?? ''}`;
@@ -137,8 +137,8 @@ function blockKatex() {
 		start(src: string) {
 			return katexStart(src, true);
 		},
-		tokenizer(src: string, tokens: Token[]) {
-			return katexTokenizer(src, tokens, true);
+		tokenizer(src: string) {
+			return katexTokenizer(src, true);
 		},
 		renderer(token: Token) {
 			return `${token?.raw ?? ''}`;
