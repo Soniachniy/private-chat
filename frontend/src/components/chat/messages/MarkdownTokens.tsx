@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { type JSX } from 'react';
 import DOMPurify from 'dompurify';
-import type { Token } from 'marked';
+import type { Token, Tokens } from 'marked';
 import CodeBlock from './CodeBlock';
 import { copyToClipboard } from '@/lib';
 import { toast } from 'sonner';
+import KatexRenderer from './KatexRenderer';
+import { decode } from 'he';
 
 interface MarkdownTokensProps {
 	tokens: Token[];
@@ -11,19 +13,18 @@ interface MarkdownTokensProps {
 	top?: boolean; // Controls whether text tokens render as <p> tags
 }
 
-const unescapeHtml = (html: string): string => {
-	const doc = new DOMParser().parseFromString(html, 'text/html');
-	console.log('doc', doc);
-	return doc.documentElement.textContent || '';
-};
+function unescapeHtml(html: string): string {
+	return decode(html);
+}
 
-const MarkdownInlineTokens: React.FC<{ tokens: Token[]; id: string }> = ({ tokens, id }) => {
+const MarkdownInlineTokens: React.FC<{ tokens?: Token[]; id: string }> = ({ tokens, id }) => {
 	return (
 		<>
-			{tokens.map((token, idx) => {
+			{tokens?.map((token, idx) => {
 				const key = `${id}-${idx}`;
 
 				if (token.type === 'escape') {
+					console.log('token.text', token.text);
 					return <span key={key}>{unescapeHtml(token.text)}</span>;
 				}
 
@@ -65,6 +66,7 @@ const MarkdownInlineTokens: React.FC<{ tokens: Token[]; id: string }> = ({ token
 				}
 
 				if (token.type === 'codespan') {
+					console.log('codespan', token.text);
 					return (
 						<code
 							key={key}
@@ -91,6 +93,10 @@ const MarkdownInlineTokens: React.FC<{ tokens: Token[]; id: string }> = ({ token
 					);
 				}
 
+				if (token.type === 'inlineKatex') {
+					return <KatexRenderer key={key} content={token.text || ''} displayMode={false} />;
+				}
+
 				if (token.type === 'text') {
 					return <span key={key}>{token.raw}</span>;
 				}
@@ -104,7 +110,7 @@ const MarkdownInlineTokens: React.FC<{ tokens: Token[]; id: string }> = ({ token
 const MarkdownTokens: React.FC<MarkdownTokensProps> = ({ tokens, id, top = false }) => {
 	return (
 		<>
-			{tokens.map((token, tokenIdx) => {
+			{tokens.map((token: Token, tokenIdx: number) => {
 				const key = `${id}-${tokenIdx}`;
 
 				if (token.type === 'hr') {
@@ -135,11 +141,11 @@ const MarkdownTokens: React.FC<MarkdownTokensProps> = ({ tokens, id, top = false
 								<table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 max-w-full rounded-xl">
 									<thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-850 dark:text-gray-400 border-none">
 										<tr>
-											{token.header.map((header, headerIdx) => (
+											{token.header.map((header: Tokens.TableCell, headerIdx: number) => (
 												<th
 													key={`${key}-header-${headerIdx}`}
 													scope="col"
-													className="px-3 py-1.5 border border-gray-100 dark:border-gray-850"
+													className="!px-3 !py-1.5 border border-gray-100 dark:border-gray-850"
 												>
 													<MarkdownInlineTokens
 														tokens={header.tokens}
@@ -150,15 +156,15 @@ const MarkdownTokens: React.FC<MarkdownTokensProps> = ({ tokens, id, top = false
 										</tr>
 									</thead>
 									<tbody>
-										{token.rows.map((row, rowIdx) => (
+										{token.rows.map((row: Tokens.TableCell[], rowIdx: number) => (
 											<tr
 												key={`${key}-row-${rowIdx}`}
 												className="bg-white dark:bg-gray-900 dark:border-gray-850 text-xs"
 											>
-												{row.map((cell, cellIdx) => (
+												{row?.map((cell: Tokens.TableCell, cellIdx: number) => (
 													<td
 														key={`${key}-row-${rowIdx}-${cellIdx}`}
-														className="px-3 py-1.5 text-gray-900 dark:text-white border border-gray-100 dark:border-gray-850"
+														className="!px-3 !py-1.5 text-gray-900 dark:text-white border border-gray-100 dark:border-gray-850"
 													>
 														<MarkdownInlineTokens
 															tokens={cell.tokens}
@@ -182,7 +188,7 @@ const MarkdownTokens: React.FC<MarkdownTokensProps> = ({ tokens, id, top = false
 							dir="auto"
 							className="border-l-4 border-gray-300 dark:border-gray-700 pl-4 italic"
 						>
-							<MarkdownTokens tokens={token.tokens} id={`${key}-bq`} top={false} />
+							<MarkdownTokens tokens={token.tokens || []} id={`${key}-bq`} top={false} />
 						</blockquote>
 					);
 				}
@@ -191,7 +197,7 @@ const MarkdownTokens: React.FC<MarkdownTokensProps> = ({ tokens, id, top = false
 					const ListTag = token.ordered ? 'ol' : 'ul';
 					return (
 						<ListTag key={key} dir="auto" start={token.start || 1}>
-							{token.items.map((item, itemIdx) => (
+							{token.items.map((item: Tokens.ListItem, itemIdx: number) => (
 								<li key={`${key}-${itemIdx}`} className="text-start">
 									{item.task && (
 										<input
@@ -201,7 +207,6 @@ const MarkdownTokens: React.FC<MarkdownTokensProps> = ({ tokens, id, top = false
 											readOnly
 										/>
 									)}
-									{/* Pass token.loose as 'top' prop - determines if text tokens render as <p> */}
 									<MarkdownTokens tokens={item.tokens} id={`${key}-${itemIdx}`} top={token.loose} />
 								</li>
 							))}
@@ -244,6 +249,16 @@ const MarkdownTokens: React.FC<MarkdownTokensProps> = ({ tokens, id, top = false
 
 				if (token.type === 'space') {
 					return <div key={key} className="my-2" />;
+				}
+
+				if (token.type === 'inlineKatex' || token.type === 'blockKatex') {
+					return (
+						<KatexRenderer
+							key={key}
+							content={token.text || ''}
+							displayMode={token.displayMode || false}
+						/>
+					);
 				}
 
 				// Unknown token type

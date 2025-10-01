@@ -6,6 +6,7 @@ import { useSettingsStore } from '@/stores/useSettingsStore';
 import VerifiedIcon from '@/assets/images/verified-2.svg?react';
 import { marked } from 'marked';
 import { processResponseContent, replaceTokens } from '@/lib/utils/markdown';
+import markedKatexExtension from '@/lib/utils/marked-katex-extension';
 import MarkdownTokens from './MarkdownTokens';
 
 interface ResponseMessageProps {
@@ -87,12 +88,12 @@ const ResponseMessage: React.FC<ResponseMessageProps> = ({
 	const tokens = useMemo(() => {
 		if (!message?.content) return [];
 
-		// Process content exactly as Svelte does
+		marked.use(markedKatexExtension());
 		const processedContent = replaceTokens(
 			processResponseContent(message.content),
-			[], // sourceIds
-			undefined, // model name (char)
-			undefined // user name
+			[],
+			undefined,
+			undefined
 		);
 
 		return marked.lexer(processedContent);

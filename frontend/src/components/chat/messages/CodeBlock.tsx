@@ -147,10 +147,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ lang, code, className = 'my-2', o
 				<div className="pt-7 bg-gray-50 dark:bg-gray-850"></div>
 
 				{!collapsed ? (
-					<div
-						className="bg-gray-50 dark:bg-gray-900 rounded-b-lg overflow-hidden"
-						style={{ minHeight: '200px' }}
-					>
+					<div className="bg-gray-50 dark:bg-gray-900 rounded-b-lg overflow-hidden">
 						<CodeEditor
 							id={`code-editor-${lang}-${Date.now()}`}
 							value={editedCode}

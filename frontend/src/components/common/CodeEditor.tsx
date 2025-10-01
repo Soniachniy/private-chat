@@ -4,7 +4,7 @@ import { keymap } from '@codemirror/view';
 import { Compartment, EditorState } from '@codemirror/state';
 import { acceptCompletion } from '@codemirror/autocomplete';
 import { indentWithTab } from '@codemirror/commands';
-import { indentUnit, LanguageDescription } from '@codemirror/language';
+import { indentUnit } from '@codemirror/language';
 import { languages } from '@codemirror/language-data';
 import { oneDark } from '@codemirror/theme-one-dark';
 
@@ -17,14 +17,7 @@ interface CodeEditorProps {
 	placeholder?: string;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({
-	id,
-	value,
-	lang = '',
-	onChange,
-	onSave,
-	placeholder = 'Enter your code here...'
-}) => {
+const CodeEditor: React.FC<CodeEditorProps> = ({ value, lang = '', onChange, onSave }) => {
 	const editorRef = useRef<HTMLDivElement>(null);
 	const viewRef = useRef<EditorView | null>(null);
 	const editorThemeRef = useRef(new Compartment());
