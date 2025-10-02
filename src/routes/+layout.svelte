@@ -549,48 +549,10 @@
 
 				const currentUrl = `${window.location.pathname}${window.location.search}`;
 				const encodedUrl = encodeURIComponent(currentUrl);
-
-				if (localStorage.token) {
-					// Get Session User Info
-					const sessionUser = await getSessionUser(localStorage.token).catch((error) => {
-						toast.error(`${error}`);
-						return null;
-					});
-
-					if (sessionUser) {
-						// Save Session User to Store
-						$socket.emit('user-join', { auth: { token: sessionUser.token } });
-
-						await user.set(sessionUser);
-						await config.set(await getBackendConfig());
-					} else {
-						// Redirect Invalid Session User to /auth Page
-						localStorage.removeItem('token');
-						// await goto(`/auth?redirect=${encodedUrl}`);
-						await goto(`/welcome`);
-					}
-				} else {
-					// Don't redirect if we're already on the auth page
-					// Needed because we pass in tokens from OAuth logins via URL fragments
-					if (
-						[
-							'/auth',
-							'/welcome',
-							'/terms',
-							'/privacy',
-							'/privacy/eu',
-							'/privacy/cal',
-							'/privacy/cookie'
-						].indexOf($page.url.pathname) === -1
-					) {
-						// await goto(`/auth?redirect=${encodedUrl}`);
-						await goto(`/welcome`);
-					}
-				}
 			}
 		} else {
 			// Redirect to /error when Backend Not Detected
-			await goto(`/error`);
+			// await goto(`/error`);
 		}
 
 		await tick();

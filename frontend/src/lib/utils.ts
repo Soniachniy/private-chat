@@ -5,9 +5,9 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
-export const getTimeRange = (timestamp: number) => {
+export const getTimeRange = (timestamp: number | string) => {
 	const now = new Date();
-	const date = new Date(timestamp * 1000); // Convert Unix timestamp to milliseconds
+	const date = new Date(Number(timestamp) * 1000); // Convert Unix timestamp to milliseconds
 
 	// Calculate the difference in milliseconds
 	const diffTime = now.getTime() - date.getTime();

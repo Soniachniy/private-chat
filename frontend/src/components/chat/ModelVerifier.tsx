@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { 
@@ -18,7 +18,6 @@ import type { VerificationStatus } from './types';
 
 interface ModelVerifierProps {
 	model: string;
-	token: string;
 	show: boolean;
 	autoVerify?: boolean;
 	onClose: () => void;
@@ -36,11 +35,10 @@ interface CheckedMap {
 
 const ModelVerifier: React.FC<ModelVerifierProps> = ({
 	model,
-	token,
 	show,
 	autoVerify = false,
 	onClose,
-	onStatusUpdate,
+	onStatusUpdate
 }) => {
 	const { t } = useTranslation('translation', { useSuspense: false });
 	const [loading, setLoading] = useState(false);
@@ -51,12 +49,14 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 	const [intelQuote, setIntelQuote] = useState<string | null>(null);
 	const [expandedSections, setExpandedSections] = useState<ExpandedSections>({
 		gpu: false,
-		tdx: false,
+		tdx: false
 	});
 	const [checkedMap, setCheckedMap] = useState<CheckedMap>({});
 
 	// Function to fetch attestation report
-	const fetchAttestationReport = async () => {
+	const fetchAttestationReport = useCallback(async () => {
+		const token = localStorage.getItem('token');
+
 		if (!model || !token) return;
 
 		setLoading(true);
@@ -65,7 +65,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 		try {
 			const data = await getModelAttestationReport({
 				token,
-				model,
+				model
 			});
 			setAttestationData(data);
 			setNvidiaPayload(JSON.parse(data?.nvidia_payload || '{}'));
@@ -76,7 +76,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [model]);
 
 	// Function to verify again
 	const verifyAgain = async () => {
@@ -92,9 +92,9 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 
 	// Toggle section expansion
 	const toggleSection = (section: 'gpu' | 'tdx') => {
-		setExpandedSections(prev => ({
+		setExpandedSections((prev) => ({
 			...prev,
-			[section]: !prev[section],
+			[section]: !prev[section]
 		}));
 	};
 
@@ -103,7 +103,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 		const success = await copyToClipboard(text);
 		if (success) {
 			toast.success(t('Copied to clipboard'));
-			setCheckedMap(prev => ({ ...prev, [key]: true }));
+			setCheckedMap((prev) => ({ ...prev, [key]: true }));
 		}
 	};
 
@@ -115,12 +115,15 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 	};
 
 	// Verification status for parent components
-	const verificationStatus: VerificationStatus = useMemo(() => ({
-		loading,
-		error,
-		data: attestationData,
-		isVerified: !loading && !error && attestationData !== null,
-	}), [loading, error, attestationData]);
+	const verificationStatus: VerificationStatus = useMemo(
+		() => ({
+			loading,
+			error,
+			data: attestationData,
+			isVerified: !loading && !error && attestationData !== null
+		}),
+		[loading, error, attestationData]
+	);
 
 	// Dispatch verification status updates
 	useEffect(() => {
@@ -131,10 +134,12 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 
 	// Fetch data when component mounts or model changes
 	useEffect(() => {
+		const token = localStorage.getItem('token');
+		console.log('fetchAttestationReport', show, autoVerify, model, token);
 		if ((show || autoVerify) && model && token) {
 			fetchAttestationReport();
 		}
-	}, [show, autoVerify, model, token]);
+	}, [show, autoVerify, model, fetchAttestationReport]);
 
 	// Reset data when modal closes
 	useEffect(() => {

@@ -2,57 +2,13 @@ import type {
 	ChatCompletionRequest,
 	ChatCompletionResponse,
 	ChatCompletionStreamResponse,
-	Chat
+	Chat,
+	Model,
+	SessionUser,
+	ChatInfo
 } from '../types';
 
-const API_BASE_URL = 'http://localhost:8000'; // This will be configurable later
-
-// Mock data for development
-export const MOCK_CHATS: Chat[] = [
-	{
-		id: '1',
-		title: 'Hello World Chat',
-		user_id: 'user1',
-		created_at: Date.now() - 86400000,
-		updated_at: Date.now() - 86400000,
-		messages: [
-			{
-				id: 'msg1',
-				role: 'user',
-				content: 'Hello! How are you?',
-				timestamp: Date.now() - 86400000
-			},
-			{
-				id: 'msg2',
-				role: 'assistant',
-				content: "Hello! I'm doing well, thank you for asking. How can I help you today?",
-				timestamp: Date.now() - 86400000 + 1000
-			}
-		]
-	},
-	{
-		id: '2',
-		title: 'React Development',
-		user_id: 'user1',
-		created_at: Date.now() - 43200000,
-		updated_at: Date.now() - 43200000,
-		messages: [
-			{
-				id: 'msg3',
-				role: 'user',
-				content: 'Can you help me with React hooks?',
-				timestamp: Date.now() - 43200000
-			},
-			{
-				id: 'msg4',
-				role: 'assistant',
-				content:
-					'Of course! React hooks are a powerful feature that allow you to use state and other React features without writing a class component. What specific aspect of hooks would you like to learn about?',
-				timestamp: Date.now() - 43200000 + 2000
-			}
-		]
-	}
-];
+const API_BASE_URL = 'https://private-chat.near.ai/api';
 
 export class OpenAIClient {
 	private apiKey: string;
@@ -61,6 +17,38 @@ export class OpenAIClient {
 	constructor(apiKey: string = '', baseURL: string = API_BASE_URL) {
 		this.apiKey = apiKey;
 		this.baseURL = baseURL;
+		console.log('OpenAIClient constructor', this.apiKey, this.baseURL);
+	}
+
+	async getModels(): Promise<Model[]> {
+		const token = localStorage.getItem('token');
+		if (!token) {
+			throw new Error('No token found');
+		}
+		const response = await fetch(`${this.baseURL}/models`, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`
+			}
+		});
+		const { data } = await response.json();
+		return data;
+	}
+
+	async authUser(): Promise<SessionUser> {
+		const token = localStorage.getItem('token');
+		if (!token) {
+			throw new Error('No token found');
+		}
+
+		const response = await fetch(`${this.baseURL}/v1/auths/`, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`
+			}
+		});
+		const data = await response.json();
+		return data;
 	}
 
 	async createChatCompletion(request: ChatCompletionRequest): Promise<ChatCompletionResponse> {
@@ -119,38 +107,51 @@ export class OpenAIClient {
 	}
 
 	// Chat management functions (these would normally be separate from OpenAI client)
-	async getChats(): Promise<Chat[]> {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-		return MOCK_CHATS;
+	async getChats(): Promise<ChatInfo[]> {
+		const token = localStorage.getItem('token');
+		if (!token) {
+			throw new Error('No token found');
+		}
+		const response = await fetch(`${this.baseURL}/v1/chats/?page=1`, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`
+			}
+		});
+		const data = await response.json();
+		console.log('ChatInfo', response, data);
+		return data;
 	}
 
-	async getChat(id: string): Promise<Chat | null> {
-		await new Promise((resolve) => setTimeout(resolve, 300));
-		return MOCK_CHATS.find((chat) => chat.id === id) || null;
+	async getChatById(id: string): Promise<Chat> {
+		const token = localStorage.getItem('token');
+		if (!token) {
+			throw new Error('No token found');
+		}
+		const response = await fetch(`${this.baseURL}/v1/chats/${id}`, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`
+			}
+		});
+		const data = await response.json();
+		console.log('response', response, data);
+		return data;
 	}
 
-	async createChat(title: string = 'New Chat'): Promise<Chat> {
-		await new Promise((resolve) => setTimeout(resolve, 300));
-
-		const newChat: Chat = {
+	async createChat(title: string = 'New Chat') {
+		return {
 			id: `chat-${Date.now()}`,
 			title,
 			user_id: 'user1',
 			created_at: Date.now(),
-			updated_at: Date.now(),
-			messages: []
+			updated_at: Date.now()
 		};
-
-		MOCK_CHATS.unshift(newChat);
-		return newChat;
 	}
 
 	async deleteChat(id: string): Promise<void> {
 		await new Promise((resolve) => setTimeout(resolve, 300));
-		const index = MOCK_CHATS.findIndex((chat) => chat.id === id);
-		if (index !== -1) {
-			MOCK_CHATS.splice(index, 1);
-		}
+		console.log('deleteChat', id);
 	}
 }
 

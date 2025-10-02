@@ -1,5 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronDownIcon, ArrowPathIcon, XCircleIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import {
+	ChevronDownIcon,
+	ArrowPathIcon,
+	XCircleIcon,
+	ArrowTopRightOnSquareIcon
+} from '@heroicons/react/24/outline';
 import { getMessageSignature, type MessageSignature } from '@/api/nearai';
 import { useMessagesSignaturesStore } from '@/stores/useMessagesSignaturesStore';
 import VerifySignatureDialog from './VerifySignatureDialog';
@@ -12,18 +17,13 @@ interface MessagesVerifierProps {
 		messages: Record<string, Message>;
 		currentId: string | null;
 	};
-	token: string;
 	chatId?: string | null;
 }
 
-const MessagesVerifier: React.FC<MessagesVerifierProps> = ({
-	history,
-	token,
-	chatId,
-}) => {
+const MessagesVerifier: React.FC<MessagesVerifierProps> = ({ history, chatId }) => {
 	const { t } = useTranslation('translation', { useSuspense: false });
 	const { messagesSignatures, setMessageSignature } = useMessagesSignaturesStore();
-	
+
 	const [loadingSignatures, setLoadingSignatures] = useState<Set<string>>(new Set());
 	const [errorSignatures, setErrorSignatures] = useState<Record<string, string>>({});
 	const [error, setError] = useState<string | null>(null);
@@ -32,21 +32,15 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({
 	const [showVerifySignatureDialog, setShowVerifySignatureDialog] = useState(false);
 	const [selectedSignature, setSelectedSignature] = useState<MessageSignature | null>(null);
 	const [viewMore, setViewMore] = useState(false);
-	
+
 	const containerRef = useRef<HTMLDivElement>(null);
 
-	// Get verifiable messages from history
-	const getChatCompletions = useCallback((history: {
-		messages: Record<string, Message>;
-		currentId: string | null;
-	}) => {
-		if (!history?.messages) return [];
+	const chatCompletions = useMemo(() => {
+		if (!history) return [];
 		return Object.values(history.messages).filter(
 			(message) => message.role === 'assistant' && message.done === true
 		);
-	}, []);
-
-	const chatCompletions = history ? getChatCompletions(history) : [];
+	}, [history]);
 
 	// Set default selection to current message when component loads or history changes
 	useEffect(() => {
@@ -62,46 +56,50 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({
 	const messageList = viewMore ? chatCompletions : chatCompletions.slice(0, 2);
 
 	// Function to fetch message signature
-	const fetchMessageSignature = useCallback(async (msgId: string) => {
-		if (!token || !history || !chatCompletions.length || !msgId) return;
-		const msg = chatCompletions.find((message) => message.chatCompletionId === msgId);
-		if (!msg || !msg.chatCompletionId || messagesSignatures[msg.chatCompletionId]) return;
-		if (loadingSignatures.has(msg.chatCompletionId)) return;
+	const fetchMessageSignature = useCallback(
+		async (msgId: string) => {
+			const token = localStorage.getItem('token');
+			if (!token || !history || !chatCompletions.length || !msgId) return;
+			const msg = chatCompletions.find((message) => message.chatCompletionId === msgId);
+			if (!msg || !msg.chatCompletionId || messagesSignatures[msg.chatCompletionId]) return;
+			if (loadingSignatures.has(msg.chatCompletionId)) return;
 
-		setLoadingSignatures(prev => new Set(prev).add(msg.chatCompletionId!));
+			setLoadingSignatures((prev) => new Set(prev).add(msg.chatCompletionId!));
 
-		try {
-			const data = await getMessageSignature({
-				token,
-				model: msg.model || 'gpt-3.5-turbo',
-				chatCompletionId: msg.chatCompletionId
-			});
-			if (!data || !data.signature) {
-				const errorMsg =
-					data?.detail || data?.message || 'No signature data found for this message';
-				setErrorSignatures(prev => ({ ...prev, [msg.chatCompletionId!]: errorMsg }));
+			try {
+				const data = await getMessageSignature({
+					token,
+					model: msg.model || 'gpt-3.5-turbo',
+					chatCompletionId: msg.chatCompletionId
+				});
+				if (!data || !data.signature) {
+					const errorMsg =
+						data?.detail || data?.message || 'No signature data found for this message';
+					setErrorSignatures((prev) => ({ ...prev, [msg.chatCompletionId!]: errorMsg }));
+					setError(errorMsg);
+					return;
+				}
+				setMessageSignature(msg.chatCompletionId, data);
+				setErrorSignatures((prev) => {
+					const newErrors = { ...prev };
+					delete newErrors[msg.chatCompletionId!];
+					return newErrors;
+				});
+			} catch (err) {
+				console.error('Error fetching message signature:', err);
+				const errorMsg = err instanceof Error ? err.message : 'Failed to fetch message signature';
+				setErrorSignatures((prev) => ({ ...prev, [msg.chatCompletionId!]: errorMsg }));
 				setError(errorMsg);
-				return;
+			} finally {
+				setLoadingSignatures((prev) => {
+					const newSet = new Set(prev);
+					newSet.delete(msg.chatCompletionId!);
+					return newSet;
+				});
 			}
-			setMessageSignature(msg.chatCompletionId, data);
-			setErrorSignatures(prev => {
-				const newErrors = { ...prev };
-				delete newErrors[msg.chatCompletionId!];
-				return newErrors;
-			});
-		} catch (err) {
-			console.error('Error fetching message signature:', err);
-			const errorMsg = err instanceof Error ? err.message : 'Failed to fetch message signature';
-			setErrorSignatures(prev => ({ ...prev, [msg.chatCompletionId!]: errorMsg }));
-			setError(errorMsg);
-		} finally {
-			setLoadingSignatures(prev => {
-				const newSet = new Set(prev);
-				newSet.delete(msg.chatCompletionId!);
-				return newSet;
-			});
-		}
-	}, [token, history, chatCompletions, messagesSignatures, loadingSignatures, setMessageSignature]);
+		},
+		[history, chatCompletions, messagesSignatures, loadingSignatures, setMessageSignature]
+	);
 
 	// Function to scroll to selected message
 	const scrollToSelectedMessage = useCallback(() => {
@@ -141,7 +139,7 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({
 			} else {
 				console.log('Could not find element with data-message-id:', selectedMessageId);
 			}
-		}, 300); // Increased delay to ensure DOM is updated
+		}, 300000); // Increased delay to ensure DOM is updated
 	}, [selectedMessageId]);
 
 	// Scroll to selected message when selectedMessageId changes
@@ -216,9 +214,7 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({
 								</h4>
 								<p
 									className={`text-xs text-gray-700 dark:text-[rgba(248,248,248,0.88)] mb-2 line-clamp-2 ${
-										selectedMessageId === message.chatCompletionId
-											? 'dark:text-white'
-											: ''
+										selectedMessageId === message.chatCompletionId ? 'dark:text-white' : ''
 									}`}
 								>
 									{message.content}

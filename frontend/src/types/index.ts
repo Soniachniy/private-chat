@@ -1,4 +1,3 @@
-// User types
 export interface SessionUser {
 	id: string;
 	name: string;
@@ -13,39 +12,55 @@ export interface SessionUser {
 	};
 }
 
-// Chat types
+export interface ChatInfo {
+	id: string;
+	content: string;
+	title: string;
+	created_at: number;
+	updated_at: string;
+}
+
 export interface Chat {
 	id: string;
-	title: string;
 	user_id: string;
-	created_at: number;
+	title: string;
+	chat: {
+		id: string;
+		title: string;
+		models: string[];
+		params: object;
+		history: {
+			messages: Record<string, Message>;
+			currentId: string;
+		};
+		messages: Message[];
+		tags: string[];
+		timestamp: number;
+		files: File[];
+	};
 	updated_at: number;
-	archived?: boolean;
-	pinned?: boolean;
-	folder_id?: string;
-	messages: Message[];
+	created_at: number;
+	share_id: string | null;
+	archived: false;
+	pinned: boolean;
+	meta: object;
+	folder_id: string | null;
 }
 
 export interface Message {
 	id: string;
+	parentId: null;
+	childrenIds: string[];
 	role: 'user' | 'assistant' | 'system';
 	content: string;
 	timestamp: number;
-	model?: string;
-	metadata?: Record<string, unknown>;
-	parentId?: string | null;
-	childrenIds?: string[];
-	files?: File[];
-	originalContent?: string;
-	annotation?: {
-		rating?: number;
-		[key: string]: unknown;
-	};
+	models: string[];
+	modelName: string;
 	chatCompletionId?: string;
 	done?: boolean;
+	model?: string;
 }
 
-// Chat history in tree format (like in Svelte version)
 export interface ChatHistory {
 	messages: Record<string, Message>;
 	currentId: string | null;
@@ -104,10 +119,29 @@ export interface ChatCompletionStreamResponse {
 // Model types
 export interface Model {
 	id: string;
-	name: string;
-	object: 'model';
+	object: string;
 	created: number;
 	owned_by: string;
+	name: string;
+	openai?: {
+		id: string;
+		object: string;
+		created: number;
+		owned_by: string;
+	};
+	urlIdx?: number;
+	info?: {
+		id: string;
+		user_id: string;
+		base_model_id: string | null;
+		name: string;
+		params: Record<string, unknown>;
+		meta: {
+			profile_image_url?: string;
+			description?: string;
+			[key: string]: unknown;
+		};
+	};
 }
 
 // Settings types
@@ -161,6 +195,7 @@ export interface Settings {
 		num_thread?: number | null;
 		num_gpu?: number | null;
 	};
+	chatBubble?: boolean;
 }
 
 // Config types
@@ -216,18 +251,24 @@ export interface ViewStore {
 	setIsMobile: (isMobile: boolean) => void;
 	isLeftSidebarOpen: boolean;
 	setIsLeftSidebarOpen: (isOpen: boolean) => void;
+	isRightSidebarOpen: boolean;
+	setIsRightSidebarOpen: (isOpen: boolean) => void;
 }
 
 export interface ChatStore {
-	chats: Chat[];
-	currentChatId: string | null;
+	chats: ChatInfo[];
+	currentChat: Chat | null;
 	isLoading: boolean;
-	setChats: (chats: Chat[]) => void;
-	setCurrentChatId: (id: string | null) => void;
-	addChat: (chat: Chat) => void;
-	updateChat: (id: string, chat: Partial<Chat>) => void;
+	models: Model[];
+	selectedModels: string[];
+	setChats: (chats: ChatInfo[]) => void;
+	setCurrentChat: (chat: Chat | null) => void;
+	setModels: (models: Model[]) => void;
+	addChat: (chat: ChatInfo) => void;
+	updateChat: (id: string, chat: Partial<ChatInfo>) => void;
 	deleteChat: (id: string) => void;
 	setLoading: (loading: boolean) => void;
+	setSelectedModels: (models: string[]) => void;
 }
 
 export interface SettingsStore {

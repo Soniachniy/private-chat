@@ -3,7 +3,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
 import ModelVerifier from './ModelVerifier';
 import MessagesVerifier from './MessagesVerifier';
-import type { Message } from '@/types';
+
 import { useChatStore } from '@/stores/useChatStore';
 import IntelLogo from '@/assets/images/intel-2.svg';
 import NvidiaLogo from '@/assets/images/nvidia-2.svg';
@@ -11,32 +11,23 @@ import SafeLogo from '@/assets/images/safe.svg';
 import { cn } from '@/lib/utils';
 import type { VerificationStatus } from './types';
 import { useTranslation } from 'react-i18next';
+import { useViewStore } from '@/stores/useViewStore';
 
 const ChatVerifier: React.FC = () => {
 	const { t } = useTranslation('translation', { useSuspense: false });
 	//TODO: Use the chatId from the useLocation hook
-	const chatId = useChatStore(store => store.currentChatId)
 
-	//TODO: load the chat history from the chatId
-	const [chatHistory] = useState<{
-		messages: Record<string, Message>;
-		currentId: string | null;
-	}>({
-		messages: {},
-		currentId: null
-	});
+	const { currentChat, selectedModels } = useChatStore();
 
-	//TODO: load the selected models from the chatId
-	const [selectedModels] = useState<string[]>([]);
-
-	const token = localStorage.token
-	const [expanded, setExpanded] = useState(false);
+	const { isRightSidebarOpen, setIsRightSidebarOpen } = useViewStore();
 	const [showModelVerifier, setShowModelVerifier] = useState(false);
-	const [modelVerificationStatus, setModelVerificationStatus] = useState<VerificationStatus | null>(null);
+	const [modelVerificationStatus, setModelVerificationStatus] = useState<VerificationStatus | null>(
+		null
+	);
 
 	// Function to toggle the verifier panel
 	const toggleVerifier = () => {
-		setExpanded(!expanded);
+		setIsRightSidebarOpen(!isRightSidebarOpen);
 	};
 
 	// Function to open model verifier
@@ -56,30 +47,20 @@ const ChatVerifier: React.FC = () => {
 
 	// Reset model verification status when expanded changes
 	useEffect(() => {
-		if (!expanded) {
+		if (!isRightSidebarOpen) {
 			setModelVerificationStatus(null);
 		}
-	}, [expanded]);
+	}, [isRightSidebarOpen]);
 
 	return (
 		<div className="relative z-50">
-			{/* Toggle Button */}
-			{!expanded && (
-			<button
-				onClick={toggleVerifier}
-					className="fixed right-4 top-4 z-50 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg transition-all duration-200"
-					title={t('Toggle Verification Panel')}
-					>
-					<img alt="safe" src={SafeLogo} className="w-8 h-8" />
-				</button>
-			)}
-
 			{/* Verifier Panel */}
 			<div
 				id="chat-verifier-sidebar"
-				className={cn('h-screen max-h-[100dvh] min-h-screen select-none overflow-y-hidden',
-				'shrink-0 bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-200 text-sm fixed z-50 top-0 right-0 overflow-x-hidden',
-				expanded ? 'md:relative w-[320px] max-w-[320px]' : 'translate-x-[320px] w-[0px]',
+				className={cn(
+					'h-screen max-h-[100dvh] min-h-screen select-none overflow-y-hidden',
+					'shrink-0 bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-200 text-sm fixed z-50 top-0 right-0 overflow-x-hidden',
+					isRightSidebarOpen ? 'md:relative w-[320px] max-w-[320px]' : 'translate-x-[320px] w-[0px]'
 				)}
 			>
 				{/* Header */}
@@ -108,9 +89,8 @@ const ChatVerifier: React.FC = () => {
 							{/* Hidden ModelVerifier for automatic verification */}
 							<ModelVerifier
 								model={selectedModels[0] || ''}
-								token={token}
 								show={false}
-								autoVerify={expanded && !!selectedModels[0]}
+								autoVerify={isRightSidebarOpen && !!selectedModels[0]}
 								onClose={() => {}}
 								onStatusUpdate={handleModelStatusUpdate}
 							/>
@@ -147,7 +127,7 @@ const ChatVerifier: React.FC = () => {
 								<>
 									<div className="bg-green-50 dark:bg-emerald-300/10 border border-green-200 dark:border-emerald-300/10 rounded-lg p-3 mb-3">
 										<div className="flex items-center mb-2">
-											<CheckCircleIcon  className="w-5 h-5 text-green-500 mr-2" />
+											<CheckCircleIcon className="w-5 h-5 text-green-500 mr-2" />
 											<span className="text-green-700 dark:text-emerald-300 text-sm font-medium">
 												{t('Your chat is confidential.')}
 											</span>
@@ -198,25 +178,29 @@ const ChatVerifier: React.FC = () => {
 					</div>
 
 					{/* Messages Verification Section */}
-					<div className="flex-1 overflow-hidden">
-						<div className="h-full flex flex-col">
-							<div className="flex-shrink-0">
-								<h2 className="text-base font-semibold text-gray-900 flex rounded items-center pl-4 dark:text-gray-300 h-8">
-									{t('Messages Verification')}
-								</h2>
-							</div>
-							<div className="flex-1 overflow-y-auto">
-								<MessagesVerifier history={chatHistory} token={token} chatId={chatId} />
+					{currentChat && (
+						<div className="flex-1 overflow-hidden">
+							<div className="h-full flex flex-col">
+								<div className="flex-shrink-0">
+									<h2 className="text-base font-semibold text-gray-900 flex rounded items-center pl-4 dark:text-gray-300 h-8">
+										{t("Messages Verification")}
+									</h2>
+								</div>
+								<div className="flex-1 overflow-y-auto">
+									<MessagesVerifier
+										history={currentChat.chat.history || { messages: {}, currentId: null }}
+										chatId={currentChat.id}
+									/>
+								</div>
 							</div>
 						</div>
-					</div>
+					)}
 				</div>
 			</div>
 
 			{/* Model Verifier Modal */}
 			<ModelVerifier
 				model={selectedModels[0] || ''}
-				token={token}
 				show={showModelVerifier}
 				onClose={closeModelVerifier}
 			/>
