@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { 
 	XMarkIcon, 
 	CheckIcon, 
@@ -42,7 +42,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 	onClose,
 	onStatusUpdate,
 }) => {
-	const { t } = useTranslation();
+	const { t } = useTranslation('translation', { useSuspense: false });
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [attestationData, setAttestationData] = useState<ModelAttestationReport | null>(null);
@@ -166,7 +166,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 				{/* Header */}
 				<div className="flex items-center justify-between px-6 py-4 dark:border-gray-700">
 					<p className="text-lg text-gray-900 dark:text-white gap-2 flex items-center">
-						Model Verification
+						{t('Model Verification')}
 					</p>
 					<button
 						onClick={handleClose}
@@ -180,19 +180,19 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 				<div className="p-6">
 					{/* Model Info */}
 					<div className="mb-4">
-						<p className="text-sm font-medium text-gray-900 dark:text-white mb-2">Verified Model</p>
+						<p className="text-sm font-medium text-gray-900 dark:text-white mb-2">{t('Verified Model')}</p>
 						<p className="text-sm text-gray-600 dark:text-gray-400">{model}</p>
 					</div>
 
 					{/* Attestation Source */}
 					<div className="mb-6">
-						<p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Attested by</p>
+						<p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{t('Attested by')}</p>
 						<div className="flex items-center space-x-4">
 							{/* NVIDIA Logo */}
 							<div className="flex items-center space-x-2">
 								<img src={NvidiaLogo} alt="NVIDIA" className="w-20 h-8" />
 							</div>
-							<p className="text-gray-600 dark:text-gray-400">and</p>
+							<p className="text-gray-600 dark:text-gray-400">{t('and')}</p>
 							{/* Intel Logo */}
 							<div className="flex items-center space-x-2">
 								<img src={IntelLogo} alt="Intel" className="w-16 h-8" />
@@ -202,15 +202,14 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 
 					{/* Description */}
 					<p className="text-gray-700 dark:text-gray-300 mb-6">
-						This automated verification tool lets you independently confirm that the model is running
-						in the TEE (Trusted Execution Environment).
+						{t('This automated verification tool lets you independently confirm that the model is running in the TEE (Trusted Execution Environment).')}
 					</p>
 
 					{/* Loading State */}
 					{loading && (
 						<div className="flex items-center justify-center py-8">
 							<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[rgba(0,236,151,1)]"></div>
-							<span className="ml-3 text-gray-600 dark:text-gray-400">Verifying attestation...</span>
+							<span className="ml-3 text-gray-600 dark:text-gray-400">{t('Verifying attestation...')}</span>
 						</div>
 					)}
 
@@ -237,7 +236,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 										<div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
 											<CheckIcon className="w-4 h-4 text-white" />
 										</div>
-										<span className="font-medium text-gray-900 dark:text-white">GPU Attestation</span>
+										<span className="font-medium text-gray-900 dark:text-white">{t('GPU Attestation')}</span>
 									</div>
 									<ChevronDownIcon
 										className={`w-5 h-5 text-gray-400 transform transition-transform ${
@@ -254,14 +253,11 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 												<div className="flex items-center mb-2">
 													<img src={NvidiaLogo} alt="NVIDIA" className="w-20 h-8 mr-2" />
 													<span className="text-sm font-medium text-green-900 dark:text-green-100">
-														Remote Attestation Service
+														{t('Remote Attestation Service')}
 													</span>
 												</div>
 												<p className="text-xs text-green-800 dark:text-green-200 mb-3">
-													This verification uses NVIDIA's Remote Attestation Service (NRAS) to prove
-													that your model is running on genuine NVIDIA hardware in a secure
-													environment. You can independently verify the attestation evidence using
-													NVIDIA's public API.
+													{t("This verification uses NVIDIA's Remote Attestation Service (NRAS) to prove that your model is running on genuine NVIDIA hardware in a secure environment. You can independently verify the attestation evidence using NVIDIA's public API.")}
 												</p>
 												<div className="space-y-1">
 													<a
@@ -271,7 +267,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 														className="flex items-center text-red-500 hover:text-red-600 text-xs transition-colors"
 													>
 														<ArrowTopRightOnSquareIcon className="w-3 h-3 mr-1" />
-														Verify GPU attestation by yourself
+														{t('Verify GPU attestation by yourself')}
 													</a>
 													<a
 														href="https://docs.nvidia.com/attestation/index.html#overview"
@@ -280,7 +276,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 														className="flex items-center text-red-500 hover:text-red-600 text-xs transition-colors"
 													>
 														<ArrowTopRightOnSquareIcon className="w-3 h-3 mr-1" />
-														Learn about NVIDIA Attestation
+														{t('Learn about NVIDIA Attestation')}
 													</a>
 												</div>
 											</div>
@@ -289,7 +285,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 											{nvidiaPayload && (
 												<div>
 													<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-														Nonce:
+														{t('Nonce')}:
 													</label>
 													<div className="relative">
 														<textarea
@@ -319,7 +315,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 											{nvidiaPayload && (
 												<div>
 													<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-														Evidence List:
+														{t('Evidence List')}:
 													</label>
 													<div className="relative">
 														<textarea
@@ -348,10 +344,10 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 												</div>
 											)}
 
-											{/* Architecture Section */}
+												{/* Architecture Section */}
 											<div>
 												<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-													Architecture:
+													{t('Architecture')}:
 												</label>
 												<div className="relative">
 													<input
@@ -391,7 +387,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 										<div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
 											<CheckIcon className="w-4 h-4 text-white" />
 										</div>
-										<span className="font-medium text-gray-900 dark:text-white">TDX Attestation</span>
+										<span className="font-medium text-gray-900 dark:text-white">{t('TDX Attestation')}</span>
 									</div>
 									<ChevronDownIcon
 										className={`w-5 h-5 text-gray-400 transform transition-transform ${
@@ -408,16 +404,13 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 												<div className="flex items-center mb-2">
 													<img src={IntelLogo} alt="Intel" className="w-16 h-8 mr-2" />
 													<span className="text-sm font-medium text-green-900 dark:text-green-100">
-														Trust Domain Extensions
+														{t('Trust Domain Extensions')}
 													</span>
 												</div>
 												<p className="text-xs text-green-800 dark:text-green-200 mb-3">
-													Intel TDX (Trust Domain Extensions) provides hardware-based attestation for
-													confidential computing. You can verify the authenticity of this TDX quote
-													using Phala's TEE Attestation Explorer - an open source tool for analyzing
-													Intel attestation reports.
+													{t('Intel TDX (Trust Domain Extensions) provides hardware-based attestation for confidential computing. You can verify the authenticity of this TDX quote using Phala\'s TEE Attestation Explorer - an open source tool for analyzing Intel attestation reports.')}
 												</p>
-												<div className="space-y-1">
+											<div className="space-y-1">
 													<a
 														href="https://proof.t16z.com/"
 														target="_blank"
@@ -425,7 +418,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 														className="flex items-center text-red-500 hover:text-red-600 text-xs transition-colors"
 													>
 														<ArrowTopRightOnSquareIcon className="w-3 h-3 mr-1" />
-														Verify TDX quote at TEE Explorer
+														{t('Verify TDX quote at TEE Explorer')}
 													</a>
 													<a
 														href="https://www.intel.com/content/www/us/en/developer/articles/technical/intel-trust-domain-extensions.html"
@@ -434,16 +427,16 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 														className="flex items-center text-red-500 hover:text-red-600 text-xs transition-colors"
 													>
 														<ArrowTopRightOnSquareIcon className="w-3 h-3 mr-1" />
-														Learn about Intel TDX
+														{t('Learn about Intel TDX')}
 													</a>
-												</div>
+											</div>
 											</div>
 
 											{/* Quote Section */}
 											{intelQuote && (
 												<div>
 													<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-														Quote:
+														{t('Quote')}:
 													</label>
 													<div className="relative">
 														<textarea
@@ -484,7 +477,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 								className="disabled:opacity-45 disabled:cursor-not-allowed bg-gray-700/5 flex items-center gap-2 font-semibold hover:bg-gray-700/10 dark:bg-gray-750 dark:hover:bg-gray-100/10 dark:text-gray-300 dark:hover:text-white transition rounded-lg text-sm py-2.5 px-5"
 							>
 								<ArrowPathIcon className="w-5 h-5" />
-								<span>Verify Again</span>
+								<span>{t('Verify Again')}</span>
 							</button>
 						</div>
 					)}

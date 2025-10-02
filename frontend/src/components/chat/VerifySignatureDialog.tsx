@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { XMarkIcon, CheckIcon, ClipboardIcon } from '@heroicons/react/24/outline';
 import { copyToClipboard } from '@/lib/index';
 import { verifySignature } from '@/lib/signature';
@@ -22,7 +22,7 @@ const VerifySignatureDialog: React.FC<VerifySignatureDialogProps> = ({
 	signature,
 	onClose,
 }) => {
-	const { t } = useTranslation();
+	const { t } = useTranslation('translation', { useSuspense: false });
 	const [verifyStatus, setVerifyStatus] = useState<VerifyStatus>('pending');
 	const [checkedMap, setCheckedMap] = useState<Record<string, boolean>>({});
 
@@ -70,7 +70,7 @@ const VerifySignatureDialog: React.FC<VerifySignatureDialogProps> = ({
 				{/* Header */}
 				<div className="flex px-6 pt-6 pb-3 items-center justify-between border-gray-200 dark:border-gray-700">
 					<p className="text-lg text-gray-900 dark:text-white gap-2 flex items-center">
-						Signature Verification
+						{t('Signature Verification')}
 					</p>
 					<button
 						onClick={onClose}
@@ -86,22 +86,12 @@ const VerifySignatureDialog: React.FC<VerifySignatureDialogProps> = ({
 					{verifyStatus === 'success' && (
 						<div className="mb-4 py-2 px-2.5 text-green-700 dark:text-green-300 bg-green-50 dark:bg-[rgba(0,236,151,0.08)] border border-green-200 dark:border-[rgba(0,236,151,0.08)] rounded-lg text-sm">
 							<CheckIcon className="w-5 h-5 text-green-500 dark:text-[rgba(0,236,151,1)] mr-0.5 inline-block" />
-							Message Signature Verified. The message signature has been confirmed to be signed by the
-							address using the
-							<a
-								className="text-blue-500 underline"
-								href="https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm"
-								rel="noopener noreferrer"
-								target="_blank"
-							>
-								ECDSA
-							</a>
-							algorithm.
+							{t('Message Signature Verified. The message signature has been confirmed to be signed by the address using the ECDSA algorithm.')}
 						</div>
 					)}
 					{verifyStatus === 'error' && (
 						<p className="flex items-center gap-2 mb-4 py-2 px-2.5 text-[#b02a37] bg-[#f8d7da] border border-[#f1aeb5] rounded-lg text-sm">
-							Sorry! The Message Signature Verification Failed
+							{t('Sorry! The Message Signature Verification Failed')}
 						</p>
 					)}
 
@@ -115,7 +105,7 @@ const VerifySignatureDialog: React.FC<VerifySignatureDialogProps> = ({
 						{/* Address Field */}
 						<div className="flex flex-col w-full mb-3">
 							<div className="mb-2 text-black dark:text-[rgba(161,161,161,1)] text-sm flex items-center justify-between">
-								<span>Address</span>
+								<span>{t('Address')}</span>
 								<button
 									type="button"
 									className="flex items-center gap-x-1 bg-none border-none text-xs bg-gray-50 hover:bg-gray-100 dark:bg-gray-850 dark:hover:bg-gray-800 transition rounded-md px-2 py-1"
@@ -126,7 +116,7 @@ const VerifySignatureDialog: React.FC<VerifySignatureDialogProps> = ({
 									) : (
 										<ClipboardIcon className="w-4 h-4" />
 									)}
-									Copy
+									{t('Copy')}
 								</button>
 							</div>
 							<div className="flex-1">
@@ -145,7 +135,7 @@ const VerifySignatureDialog: React.FC<VerifySignatureDialogProps> = ({
 						{/* Message Field */}
 						<div className="flex flex-col w-full mb-3">
 							<div className="mb-2 text-black dark:text-[rgba(161,161,161,1)] text-sm flex items-center justify-between">
-								<span>Message</span>
+								<span>{t('Message')}</span>
 								<button
 									type="button"
 									className="flex items-center gap-x-1 bg-none border-none text-xs bg-gray-50 hover:bg-gray-100 dark:bg-gray-850 dark:hover:bg-gray-800 transition rounded-md px-2 py-1"
@@ -156,7 +146,7 @@ const VerifySignatureDialog: React.FC<VerifySignatureDialogProps> = ({
 									) : (
 										<ClipboardIcon className="w-4 h-4" />
 									)}
-									Copy
+									{t('Copy')}
 								</button>
 							</div>
 							<div className="flex-1">
@@ -174,7 +164,7 @@ const VerifySignatureDialog: React.FC<VerifySignatureDialogProps> = ({
 						{/* Signature Field */}
 						<div className="flex flex-col w-full mb-6">
 							<div className="mb-2 text-black dark:text-[rgba(161,161,161,1)] text-sm flex items-center justify-between">
-								<span>Signature</span>
+								<span>{t('Signature')}</span>
 								<button
 									type="button"
 									className="flex items-center gap-x-1 bg-none border-none text-xs bg-gray-50 hover:bg-gray-100 dark:bg-gray-850 dark:hover:bg-gray-800 transition rounded-md px-2 py-1"
@@ -185,7 +175,7 @@ const VerifySignatureDialog: React.FC<VerifySignatureDialogProps> = ({
 									) : (
 										<ClipboardIcon className="w-4 h-4" />
 									)}
-									Copy
+							{t('Copy')}
 								</button>
 							</div>
 							<div className="flex-1">
@@ -207,7 +197,7 @@ const VerifySignatureDialog: React.FC<VerifySignatureDialogProps> = ({
 								type="button"
 								onClick={onClose}
 							>
-								Close
+								{t('Close')}
 							</button>
 						</div>
 					</form>
