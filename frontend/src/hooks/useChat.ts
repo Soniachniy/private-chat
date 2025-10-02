@@ -19,7 +19,7 @@ export const useChats = () => {
 export const useChat = (chatId?: string) => {
 	return useQuery({
 		queryKey: ['chat', chatId],
-		queryFn: () => openAIClient.getChat(chatId!),
+		queryFn: () => openAIClient.getChatById(chatId!),
 		enabled: !!chatId
 	});
 };

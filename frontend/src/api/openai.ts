@@ -322,25 +322,35 @@ export class OpenAIClient {
 		return data;
 	}
 
+	async getChatById(id: string): Promise<Chat> {
+		const token = localStorage.getItem('token');
+		if (!token) {
+			throw new Error('No token found');
+		}
+		const response = await fetch(`${this.baseURL}/v1/chats/${id}`, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`
+			}
+		});
+		const data = await response.json();
+		console.log('response', response, data);
+		return data;
+	}
+
 	async getChat(id: string): Promise<Chat | null> {
 		await new Promise((resolve) => setTimeout(resolve, 300));
 		return MOCK_CHATS.find((chat) => chat.id === id) || null;
 	}
 
-	async createChat(title: string = 'New Chat'): Promise<Chat> {
-		await new Promise((resolve) => setTimeout(resolve, 300));
-
-		const newChat: Chat = {
+	async createChat(title: string = 'New Chat') {
+		return {
 			id: `chat-${Date.now()}`,
 			title,
 			user_id: 'user1',
 			created_at: Date.now(),
-			updated_at: Date.now(),
-			messages: []
+			updated_at: Date.now()
 		};
-
-		MOCK_CHATS.unshift(newChat);
-		return newChat;
 	}
 
 	async deleteChat(id: string): Promise<void> {

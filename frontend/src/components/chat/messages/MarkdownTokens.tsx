@@ -20,7 +20,6 @@ const MarkdownInlineTokens: React.FC<{ tokens?: Token[]; id: string }> = ({ toke
 				const key = `${id}-${idx}`;
 
 				if (token.type === 'escape') {
-					console.log('token.text', token.text);
 					return <span key={key}>{unescapeHtml(token.text)}</span>;
 				}
 
@@ -62,7 +61,6 @@ const MarkdownInlineTokens: React.FC<{ tokens?: Token[]; id: string }> = ({ toke
 				}
 
 				if (token.type === 'codespan') {
-					console.log('codespan', token.text);
 					return (
 						<code
 							key={key}

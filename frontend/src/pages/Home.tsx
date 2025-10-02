@@ -35,7 +35,10 @@ const Home: React.FC = () => {
 
 	useEffect(() => {
 		if (chat) {
-			setMessages(chat.messages || chats.find((c) => c.id === currentChatId)?.messages || []);
+			console.log('chat', chat);
+			setMessages(
+				chat.chat.messages || chats.find((c) => c.id === currentChatId)?.chat.messages || []
+			);
 		} else if (!currentChatId) {
 			setMessages([]);
 		}
@@ -135,11 +138,6 @@ const Home: React.FC = () => {
 	const handleEditMessage = (messageId: string, content: string) => {
 		console.log('Edit message:', messageId, content);
 		// Update the message in the chat
-		if (currentChatId) {
-			updateChat(currentChatId, {
-				messages: messages.map((msg) => (msg.id === messageId ? { ...msg, content } : msg))
-			});
-		}
 	};
 
 	const handleSaveMessage = (messageId: string, content: string) => {
@@ -149,11 +147,6 @@ const Home: React.FC = () => {
 
 	const handleDeleteMessage = (messageId: string) => {
 		console.log('Delete message:', messageId);
-		if (currentChatId) {
-			updateChat(currentChatId, {
-				messages: messages.filter((msg) => msg.id !== messageId)
-			});
-		}
 	};
 
 	const handleRegenerateResponse = () => {
@@ -175,7 +168,7 @@ const Home: React.FC = () => {
 		);
 	}
 
-	if (messages.length === 0) {
+	if (chat?.chat.messages?.length === 0) {
 		return (
 			<ChatPlaceholder
 				submitVoice={async (voice) => {
@@ -187,14 +180,14 @@ const Home: React.FC = () => {
 			/>
 		);
 	}
-
+	console.log('chat', chat);
 	return (
 		<div className="flex flex-col h-full bg-gray-900">
 			{/* Messages */}
 			<Navbar />
-			<div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+			<div className="flex-1 overflow-y-auto px-4 py-4 pt-8 space-y-4">
 				{/* Messages */}
-				{messages.map((message, idx) => {
+				{chat?.chat.messages.map((message, idx) => {
 					// Create a mock history object for the message components
 					const mockHistory: ChatHistory = {
 						messages: { [message.id]: message },

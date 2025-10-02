@@ -16,33 +16,39 @@ export interface SessionUser {
 // Chat types
 export interface Chat {
 	id: string;
-	title: string;
 	user_id: string;
-	created_at: number;
+	title: string;
+	chat: {
+		id: string;
+		title: string;
+		models: string[];
+		params: object;
+		history: {
+			messages: Record<string, Message>;
+			currentId: string;
+		};
+		messages: Message[];
+		tags: string[];
+		timestamp: number;
+		files: File[];
+	};
 	updated_at: number;
-	archived?: boolean;
-	pinned?: boolean;
-	folder_id?: string;
-	messages: Message[];
+	created_at: number;
+	share_id: string | null;
+	archived: false;
+	pinned: boolean;
+	meta: object;
+	folder_id: string | null;
 }
 
 export interface Message {
 	id: string;
+	parentId: null;
+	childrenIds: string[];
 	role: 'user' | 'assistant' | 'system';
 	content: string;
 	timestamp: number;
-	model?: string;
-	metadata?: Record<string, unknown>;
-	parentId?: string | null;
-	childrenIds?: string[];
-	files?: File[];
-	originalContent?: string;
-	annotation?: {
-		rating?: number;
-		[key: string]: unknown;
-	};
-	chatCompletionId?: string;
-	done?: boolean;
+	models: string[];
 }
 
 // Chat history in tree format (like in Svelte version)
