@@ -7,6 +7,7 @@ import VerifiedIcon from '@/assets/images/verified-2.svg?react';
 import { marked } from 'marked';
 import { processResponseContent, replaceTokens } from '@/lib/utils/markdown';
 import markedKatexExtension from '@/lib/utils/marked-katex-extension';
+import markedExtension from '@/lib/utils/extension';
 import MarkdownTokens from './MarkdownTokens';
 
 interface ResponseMessageProps {
@@ -89,6 +90,7 @@ const ResponseMessage: React.FC<ResponseMessageProps> = ({
 		if (!message?.content) return [];
 
 		marked.use(markedKatexExtension());
+		marked.use(markedExtension());
 		const processedContent = replaceTokens(
 			processResponseContent(message.content),
 			[],
@@ -114,7 +116,7 @@ const ResponseMessage: React.FC<ResponseMessageProps> = ({
 			<div className="flex-auto w-0 pl-1">
 				<div className="flex items-center space-x-2">
 					<span className="line-clamp-1 font-normal text-black dark:text-white">
-						{message.model || 'Assistant'}
+						{message.modelName || 'Assistant'}
 					</span>
 
 					{/* Verification Badge */}
@@ -131,8 +133,8 @@ const ResponseMessage: React.FC<ResponseMessageProps> = ({
 
 				<div className={`chat-${message.role} w-full min-w-full markdown-prose`}>
 					<div>
-						{/* Files */}
-						{message.files && message.files.length > 0 && (
+						{/* Files TODO: Add files */}
+						{/* {message.files && message.files.length > 0 && (
 							<div className="my-1 w-full flex overflow-x-auto gap-2 flex-wrap">
 								{message.files.map((file) => (
 									<div key={file.id}>
@@ -159,7 +161,7 @@ const ResponseMessage: React.FC<ResponseMessageProps> = ({
 									</div>
 								))}
 							</div>
-						)}
+						)} */}
 
 						{/* Edit Mode */}
 						{edit ? (

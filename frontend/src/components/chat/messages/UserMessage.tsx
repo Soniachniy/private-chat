@@ -95,7 +95,7 @@ const UserMessage: React.FC<UserMessageProps> = ({
 			<div className="flex-auto w-0 max-w-full pl-1">
 				<div className={`chat-${message.role} w-full min-w-full markdown-prose`}>
 					{/* Files */}
-					{message.files && message.files.length > 0 && (
+					{/* {message.files && message.files.length > 0 && (
 						<div className="mt-2.5 mb-1 w-full flex flex-col justify-end overflow-x-auto gap-1 flex-wrap">
 							{message.files.map((file) => (
 								<div key={file.id} className={'self-end'}>
@@ -122,7 +122,7 @@ const UserMessage: React.FC<UserMessageProps> = ({
 								</div>
 							))}
 						</div>
-					)}
+					)} */}
 
 					{/* Content */}
 					{message.content !== '' && (
@@ -164,7 +164,7 @@ const UserMessage: React.FC<UserMessageProps> = ({
 							) : (
 								<div className="w-full">
 									<div className={`flex justify-end pb-1`}>
-										<div
+										{/* <div
 											className={`rounded-xl ${`max-w-[90%] px-4 py-2 bg-gray-50 dark:bg-gray-850 ${
 												message.files ? 'rounded-tr-lg' : ''
 											}`}`}
@@ -172,7 +172,7 @@ const UserMessage: React.FC<UserMessageProps> = ({
 											{message.content && (
 												<div className="whitespace-pre-wrap">{message.content}</div>
 											)}
-										</div>
+										</div> */}
 									</div>
 
 									<div className={`flex justify-end text-gray-600 dark:text-gray-500`}>

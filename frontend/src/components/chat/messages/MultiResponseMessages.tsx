@@ -97,7 +97,9 @@ const MultiResponseMessages: React.FC<MultiResponseMessagesProps> = ({
 						}`}
 					>
 						Response {index + 1}
-						{response.model && <span className="ml-1 text-xs opacity-75">({response.model})</span>}
+						{response.modelName && (
+							<span className="ml-1 text-xs opacity-75">({response.modelName})</span>
+						)}
 					</button>
 				))}
 			</div>
@@ -163,7 +165,7 @@ const MultiResponseMessages: React.FC<MultiResponseMessagesProps> = ({
 									/>
 									<span className="text-sm text-gray-700 dark:text-gray-300">
 										Response {index + 1}
-										{response.model && ` (${response.model})`}
+										{response.modelName && ` (${response.modelName})`}
 									</span>
 								</label>
 							))}

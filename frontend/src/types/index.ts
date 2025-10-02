@@ -1,4 +1,3 @@
-// User types
 export interface SessionUser {
 	id: string;
 	name: string;
@@ -13,7 +12,14 @@ export interface SessionUser {
 	};
 }
 
-// Chat types
+export interface ChatInfo {
+	id: string;
+	content: string;
+	title: string;
+	created_at: number;
+	updated_at: string;
+}
+
 export interface Chat {
 	id: string;
 	user_id: string;
@@ -49,9 +55,12 @@ export interface Message {
 	content: string;
 	timestamp: number;
 	models: string[];
+	modelName: string;
+	chatCompletionId?: string;
+	done?: boolean;
+	model?: string;
 }
 
-// Chat history in tree format (like in Svelte version)
 export interface ChatHistory {
 	messages: Record<string, Message>;
 	currentId: string | null;
@@ -215,16 +224,16 @@ export interface ViewStore {
 }
 
 export interface ChatStore {
-	chats: Chat[];
-	currentChatId: string | null;
+	chats: ChatInfo[];
+	currentChat: Chat | null;
 	isLoading: boolean;
 	models: Model[];
 	selectedModels: string[];
-	setChats: (chats: Chat[]) => void;
+	setChats: (chats: ChatInfo[]) => void;
+	setCurrentChat: (chat: Chat | null) => void;
 	setModels: (models: Model[]) => void;
-	setCurrentChatId: (id: string | null) => void;
-	addChat: (chat: Chat) => void;
-	updateChat: (id: string, chat: Partial<Chat>) => void;
+	addChat: (chat: ChatInfo) => void;
+	updateChat: (id: string, chat: Partial<ChatInfo>) => void;
 	deleteChat: (id: string) => void;
 	setLoading: (loading: boolean) => void;
 	setSelectedModels: (models: string[]) => void;

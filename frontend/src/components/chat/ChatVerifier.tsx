@@ -3,7 +3,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
 import ModelVerifier from './ModelVerifier';
 import MessagesVerifier from './MessagesVerifier';
-import type { Message } from '@/types';
+
 import { useChatStore } from '@/stores/useChatStore';
 import IntelLogo from '@/assets/images/intel-2.svg';
 import NvidiaLogo from '@/assets/images/nvidia-2.svg';
@@ -14,21 +14,9 @@ import { useViewStore } from '@/stores/useViewStore';
 
 const ChatVerifier: React.FC = () => {
 	//TODO: Use the chatId from the useLocation hook
-	const chatId = useChatStore((store) => store.currentChatId);
 
-	//TODO: load the chat history from the chatId
-	const [chatHistory] = useState<{
-		messages: Record<string, Message>;
-		currentId: string | null;
-	}>({
-		messages: {},
-		currentId: null
-	});
+	const { currentChat, selectedModels } = useChatStore();
 
-	//TODO: load the selected models from the chatId
-	const [selectedModels] = useState<string[]>([]);
-
-	const token = localStorage.token;
 	const { isRightSidebarOpen, setIsRightSidebarOpen } = useViewStore();
 	const [showModelVerifier, setShowModelVerifier] = useState(false);
 	const [modelVerificationStatus, setModelVerificationStatus] = useState<VerificationStatus | null>(
@@ -64,8 +52,6 @@ const ChatVerifier: React.FC = () => {
 
 	return (
 		<div className="relative z-50">
-			{/* Toggle Button */}
-
 			{/* Verifier Panel */}
 			<div
 				id="chat-verifier-sidebar"
@@ -101,7 +87,6 @@ const ChatVerifier: React.FC = () => {
 							{/* Hidden ModelVerifier for automatic verification */}
 							<ModelVerifier
 								model={selectedModels[0] || ''}
-								token={token}
 								show={false}
 								autoVerify={isRightSidebarOpen && !!selectedModels[0]}
 								onClose={() => {}}
@@ -195,25 +180,29 @@ const ChatVerifier: React.FC = () => {
 					</div>
 
 					{/* Messages Verification Section */}
-					<div className="flex-1 overflow-hidden">
-						<div className="h-full flex flex-col">
-							<div className="flex-shrink-0">
-								<h2 className="text-base font-semibold text-gray-900 flex rounded items-center pl-4 dark:text-gray-300 h-8">
-									Messages Verification
-								</h2>
-							</div>
-							<div className="flex-1 overflow-y-auto">
-								<MessagesVerifier history={chatHistory} token={token} chatId={chatId} />
+					{currentChat && (
+						<div className="flex-1 overflow-hidden">
+							<div className="h-full flex flex-col">
+								<div className="flex-shrink-0">
+									<h2 className="text-base font-semibold text-gray-900 flex rounded items-center pl-4 dark:text-gray-300 h-8">
+										Messages Verification
+									</h2>
+								</div>
+								<div className="flex-1 overflow-y-auto">
+									<MessagesVerifier
+										history={currentChat.chat.history || { messages: {}, currentId: null }}
+										chatId={currentChat.id}
+									/>
+								</div>
 							</div>
 						</div>
-					</div>
+					)}
 				</div>
 			</div>
 
 			{/* Model Verifier Modal */}
 			<ModelVerifier
 				model={selectedModels[0] || ''}
-				token={token}
 				show={showModelVerifier}
 				onClose={closeModelVerifier}
 			/>

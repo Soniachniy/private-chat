@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import MessageInput from '@/components/chat/MessageInput';
 import ChatPlaceholder from '@/components/chat/ChatPlaceholder';
 import UserMessage from '@/components/chat/messages/UserMessage';
 import ResponseMessage from '@/components/chat/messages/ResponseMessage';
 import MultiResponseMessages from '@/components/chat/messages/MultiResponseMessages';
-import { useChat, useCreateChat } from '@/hooks/useChat';
+import { useChat } from '@/hooks/useChat';
 import { useChatStore } from '@/stores/useChatStore';
 
-import { openAIClient } from '@/api/openai';
-import type { Message, ChatCompletionRequest, ChatHistory } from '@/types';
+import type { Message, ChatHistory } from '@/types';
 import NearAIIcon from '@/assets/icons/near-icon-green.svg?react';
 
 import Navbar from '@/components/chat/Navbar';
@@ -17,122 +16,33 @@ import Navbar from '@/components/chat/Navbar';
 const Home: React.FC = () => {
 	const { chatId } = useParams<{ chatId: string }>();
 	const params = useParams();
-	const navigate = useNavigate();
+	// const navigate = useNavigate();
 	const currentChatId = chatId || params.chatId;
-	const { setCurrentChatId, updateChat, chats } = useChatStore();
+	const { setCurrentChat, chats } = useChatStore();
 
 	const [messages, setMessages] = useState<Message[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
+	const [isLoading] = useState(false);
 
 	const { data: chat, isLoading: isChatLoading } = useChat(currentChatId);
-	const createChatMutation = useCreateChat();
+	// const createChatMutation = useCreateChat();
 
 	useEffect(() => {
 		if (currentChatId) {
-			setCurrentChatId(currentChatId);
+			setCurrentChat(chat || null);
 		}
-	}, [currentChatId, setCurrentChatId]);
+	}, [currentChatId, setCurrentChat, chat]);
 
 	useEffect(() => {
 		if (chat) {
 			console.log('chat', chat);
-			setMessages(
-				chat.chat.messages || chats.find((c) => c.id === currentChatId)?.chat.messages || []
-			);
+			setMessages(chat.chat.messages || []);
 		} else if (!currentChatId) {
 			setMessages([]);
 		}
 	}, [chat, currentChatId, chats]);
 
 	const handleSendMessage = async (content: string) => {
-		let activeChatId = currentChatId;
-
-		// Create new chat if we don't have one
-		if (!activeChatId) {
-			try {
-				const newChat = await createChatMutation.mutateAsync('');
-				activeChatId = newChat.id;
-				navigate(`/c/${activeChatId}`);
-			} catch (error) {
-				console.error('Failed to create chat:', error);
-				return;
-			}
-		}
-
-		const userMessage: Message = {
-			id: `msg-${Date.now()}`,
-			role: 'user',
-			content,
-			timestamp: Date.now()
-		};
-
-		setMessages((prev) => [...prev, userMessage]);
-		setIsLoading(true);
-
-		try {
-			const request: ChatCompletionRequest = {
-				model: 'gpt-3.5-turbo',
-				messages: [...messages, userMessage].map((msg) => ({
-					role: msg.role,
-					content: msg.content
-				})),
-				stream: true,
-				temperature: 0.7,
-				max_tokens: 1000
-			};
-
-			const assistantMessage: Message = {
-				id: `msg-${Date.now() + 1}`,
-				role: 'assistant',
-				content: '',
-				timestamp: Date.now()
-			};
-
-			setMessages((prev) => [...prev, assistantMessage]);
-			setIsLoading(false);
-
-			// Handle streaming response
-			let fullContent = '';
-			for await (const chunk of openAIClient.createChatCompletionStream(request)) {
-				const content = chunk.choices[0]?.delta?.content;
-				if (content) {
-					fullContent += content;
-					setMessages((prev) =>
-						prev.map((msg) =>
-							msg.id === assistantMessage.id ? { ...msg, content: fullContent } : msg
-						)
-					);
-				}
-
-				if (chunk.choices[0]?.finish_reason === 'stop') {
-					break;
-				}
-			}
-
-			// Update the chat with new messages
-			const updatedMessages = [
-				...messages,
-				userMessage,
-				{ ...assistantMessage, content: fullContent }
-			];
-			updateChat(activeChatId!, {
-				messages: updatedMessages,
-				updated_at: Date.now(),
-				title: updatedMessages.length === 2 ? content.slice(0, 50) + '...' : undefined
-			});
-		} catch (error) {
-			console.error('Failed to send message:', error);
-			setIsLoading(false);
-
-			// Add error message
-			const errorMessage: Message = {
-				id: `msg-${Date.now() + 1}`,
-				role: 'assistant',
-				content: 'Sorry, I encountered an error while processing your message. Please try again.',
-				timestamp: Date.now()
-			};
-			setMessages((prev) => [...prev, errorMessage]);
-		}
+		console.log('Send message:', content);
 	};
 
 	const handleEditMessage = (messageId: string, content: string) => {

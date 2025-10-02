@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { openAIClient } from '../api/openai';
 import { useChatStore } from '../stores/useChatStore';
-import type { ChatCompletionRequest } from '../types';
+import type { ChatCompletionRequest, ChatInfo } from '../types';
 
 export const useChats = () => {
 	const { setChats } = useChatStore();
@@ -31,7 +31,7 @@ export const useCreateChat = () => {
 	return useMutation({
 		mutationFn: (title?: string) => openAIClient.createChat(title),
 		onSuccess: (newChat) => {
-			addChat(newChat);
+			addChat(newChat as unknown as ChatInfo); //TODO: fix this
 			queryClient.invalidateQueries({ queryKey: ['chats'] });
 		}
 	});

@@ -1,11 +1,13 @@
 import React, { type JSX } from 'react';
 import DOMPurify from 'dompurify';
 import type { Token, Tokens } from 'marked';
+import { lexer } from 'marked';
 import CodeBlock from './CodeBlock';
 import { copyToClipboard } from '@/lib';
 import { toast } from 'sonner';
 import KatexRenderer from './KatexRenderer';
 import { unescapeHtml } from '@/lib/utils/markdown';
+import Collapsible from '../../common/Collapsible';
 
 interface MarkdownTokensProps {
 	tokens: Token[];
@@ -252,6 +254,18 @@ const MarkdownTokens: React.FC<MarkdownTokensProps> = ({ tokens, id, top = false
 							content={token.text || ''}
 							displayMode={token.displayMode || false}
 						/>
+					);
+				}
+				if (token.type === 'details') {
+					// Parse the text content using marked lexer for recursive markdown parsing
+					const contentTokens = lexer(token.text || '');
+					console.log('contentTokens', token.text);
+					return (
+						<Collapsible key={key} title={token.summary} className="w-full space-y-1 mb-1.5">
+							<div className="mb-1.5">
+								<MarkdownTokens tokens={contentTokens} id={`${key}-details`} top={false} />
+							</div>
+						</Collapsible>
 					);
 				}
 

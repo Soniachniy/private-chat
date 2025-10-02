@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
@@ -18,7 +18,6 @@ import type { VerificationStatus } from './types';
 
 interface ModelVerifierProps {
 	model: string;
-	token: string;
 	show: boolean;
 	autoVerify?: boolean;
 	onClose: () => void;
@@ -36,7 +35,6 @@ interface CheckedMap {
 
 const ModelVerifier: React.FC<ModelVerifierProps> = ({
 	model,
-	token,
 	show,
 	autoVerify = false,
 	onClose,
@@ -56,7 +54,9 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 	const [checkedMap, setCheckedMap] = useState<CheckedMap>({});
 
 	// Function to fetch attestation report
-	const fetchAttestationReport = async () => {
+	const fetchAttestationReport = useCallback(async () => {
+		const token = localStorage.getItem('token');
+
 		if (!model || !token) return;
 
 		setLoading(true);
@@ -76,7 +76,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [model]);
 
 	// Function to verify again
 	const verifyAgain = async () => {
@@ -134,10 +134,12 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 
 	// Fetch data when component mounts or model changes
 	useEffect(() => {
+		const token = localStorage.getItem('token');
+		console.log('fetchAttestationReport', show, autoVerify, model, token);
 		if ((show || autoVerify) && model && token) {
 			fetchAttestationReport();
 		}
-	}, [show, autoVerify, model, token]);
+	}, [show, autoVerify, model, fetchAttestationReport]);
 
 	// Reset data when modal closes
 	useEffect(() => {

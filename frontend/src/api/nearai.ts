@@ -1,9 +1,9 @@
-import { WEBUI_BASE_URL } from './constants';
+import { TEMP_API_BASE_URL } from './constants';
 
 export const getModelAttestationReport = async ({
 	token,
 	model,
-	url = `${WEBUI_BASE_URL}/api`
+	url = `${TEMP_API_BASE_URL}/api`
 }: GetModelAttestationReportParams): Promise<ModelAttestationReport> => {
 	const res = await fetch(`${url}/attestation/report?model=${encodeURIComponent(model)}`, {
 		method: 'GET',
@@ -19,7 +19,7 @@ export const getMessageSignature = async ({
 	token,
 	model,
 	chatCompletionId,
-	url = `${WEBUI_BASE_URL}/api`,
+	url = `${TEMP_API_BASE_URL}/api`,
 	signingAlgorithm = 'ecdsa'
 }: GetMessageSignatureParams): Promise<MessageSignature> => {
 	const res = await fetch(

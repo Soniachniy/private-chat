@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+// import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import Spinner from '../components/common/Spinner';
 import NearAIIcon from '@/assets/icons/near-icon-green.svg?react';
@@ -32,11 +32,11 @@ interface Config {
 }
 
 const AuthPage: React.FC = () => {
-	const navigate = useNavigate();
-	const [searchParams] = useSearchParams();
+	// const navigate = useNavigate();
+	// const [searchParams] = useSearchParams();
 
-	const [loaded, setLoaded] = useState(false);
-	const [config, setConfig] = useState<Config>({});
+	const [loaded] = useState(false);
+	const [config] = useState<Config>({});
 	const [mode, setMode] = useState<AuthMode>('signin');
 
 	const [name, setName] = useState('');

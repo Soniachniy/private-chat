@@ -27,7 +27,6 @@ export const useAppInitialization = create<AppInitializationStore>((set, get) =>
 			if (user) {
 				const chats = await openAIClient.getChats();
 				useChatStore.getState().setChats(chats);
-				console.log('chats', chats);
 			}
 
 			set({ isInitialized: true, isLoading: false });

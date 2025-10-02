@@ -2,7 +2,7 @@ const browser = true;
 const dev = true;
 
 export const APP_NAME = 'NEAR AI Private Chat';
-
+export const TEMP_API_BASE_URL = 'https://private-chat.near.ai';
 export const WEBUI_HOSTNAME = browser ? (dev ? `${location.hostname}:8080` : ``) : '';
 export const WEBUI_BASE_URL = browser ? (dev ? `http://${WEBUI_HOSTNAME}` : ``) : ``;
 export const WEBUI_API_BASE_URL = `${WEBUI_BASE_URL}/api/v1`;
