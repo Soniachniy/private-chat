@@ -2,6 +2,7 @@ import SafeLogo from '@/assets/images/safe.svg';
 import { useCreateChat } from '@/hooks/useChat';
 import { useViewStore } from '@/stores/useViewStore';
 import { useNavigate, useParams } from 'react-router-dom';
+import ModelSelector from './ModelSelector';
 
 export default function Navbar() {
 	const { isLeftSidebarOpen, isRightSidebarOpen, setIsRightSidebarOpen, setIsLeftSidebarOpen } =
@@ -81,8 +82,8 @@ export default function Navbar() {
 						)}
 
 						{/* Center Content */}
-						<div className="flex-1 overflow-hidden max-w-full py-0.5">
-							{/* Model Selector would go here if needed */}
+						<div className="flex-1 overflow-hidden max-w-full py-0.5 flex items-center justify-center">
+							<ModelSelector />
 						</div>
 
 						{/* Right Side Controls */}

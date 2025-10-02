@@ -2,10 +2,12 @@ import type {
 	ChatCompletionRequest,
 	ChatCompletionResponse,
 	ChatCompletionStreamResponse,
-	Chat
+	Chat,
+	Model,
+	SessionUser
 } from '../types';
 
-const API_BASE_URL = 'http://localhost:8000'; // This will be configurable later
+const API_BASE_URL = 'https://private-chat.near.ai/api';
 
 // Mock data for development
 export const MOCK_CHATS: Chat[] = [
@@ -217,6 +219,37 @@ export class OpenAIClient {
 		console.log('OpenAIClient constructor', this.apiKey, this.baseURL);
 	}
 
+	async getModels(): Promise<Model[]> {
+		const token = localStorage.getItem('token');
+		if (!token) {
+			throw new Error('No token found');
+		}
+		const response = await fetch(`${this.baseURL}/models`, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`
+			}
+		});
+		const { data } = await response.json();
+		return data;
+	}
+
+	async authUser(): Promise<SessionUser> {
+		const token = localStorage.getItem('token');
+		if (!token) {
+			throw new Error('No token found');
+		}
+
+		const response = await fetch(`${this.baseURL}/v1/auths/`, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`
+			}
+		});
+		const data = await response.json();
+		return data;
+	}
+
 	async createChatCompletion(request: ChatCompletionRequest): Promise<ChatCompletionResponse> {
 		// For now, return mock data
 		await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
@@ -274,8 +307,19 @@ export class OpenAIClient {
 
 	// Chat management functions (these would normally be separate from OpenAI client)
 	async getChats(): Promise<Chat[]> {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-		return MOCK_CHATS;
+		const token = localStorage.getItem('token');
+		if (!token) {
+			throw new Error('No token found');
+		}
+		const response = await fetch(`${this.baseURL}/v1/chats/?page=1`, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`
+			}
+		});
+		const data = await response.json();
+		console.log('data', response, data);
+		return data;
 	}
 
 	async getChat(id: string): Promise<Chat | null> {

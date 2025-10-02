@@ -1,12 +1,14 @@
 import { create } from 'zustand';
-import type { Chat, ChatStore } from '../types';
+import type { Chat, ChatStore, Model } from '../types';
 
 export const useChatStore = create<ChatStore>((set) => ({
 	chats: [],
 	currentChatId: null,
 	isLoading: false,
-	models: ['gpt-oss-120b', 'deepseek-v3.1', 'qwen3-30b-a3b-instruct-2507'],
+	models: [],
+	selectedModels: [''],
 	setChats: (chats: Chat[]) => set({ chats }),
+	setModels: (models: Model[]) => set({ models }),
 
 	setCurrentChatId: (id: string | null) => set({ currentChatId: id }),
 
@@ -23,5 +25,6 @@ export const useChatStore = create<ChatStore>((set) => ({
 			currentChatId: state.currentChatId === id ? null : state.currentChatId
 		})),
 
-	setLoading: (loading: boolean) => set({ isLoading: loading })
+	setLoading: (loading: boolean) => set({ isLoading: loading }),
+	setSelectedModels: (models: string[]) => set({ selectedModels: models })
 }));

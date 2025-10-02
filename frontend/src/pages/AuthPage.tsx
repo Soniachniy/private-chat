@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import {
-	userSignIn,
-	userSignUp,
-	ldapUserSignIn,
-	getSessionUser,
-	getBackendConfig,
-	type User
-} from '../api/auth';
 import Spinner from '../components/common/Spinner';
 import NearAIIcon from '@/assets/icons/near-icon-green.svg?react';
 import CheckIcon from '@/assets/icons/check-icon.svg?react';
@@ -64,46 +56,32 @@ const AuthPage: React.FC = () => {
 	}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
 	const loadConfig = async () => {
-		try {
-			const backendConfig = await getBackendConfig();
-			setConfig(backendConfig);
-
-			if (backendConfig.features?.enable_ldap) {
-				setMode('ldap');
-			}
-
-			setLoaded(true);
-		} catch (error) {
-			console.error('Failed to load config:', error);
-			setLoaded(true);
-		}
+		// try {
+		// 	const backendConfig = await getBackendConfig();
+		// 	setConfig(backendConfig);
+		// 	if (backendConfig.features?.enable_ldap) {
+		// 		setMode('ldap');
+		// 	}
+		// 	setLoaded(true);
+		// } catch (error) {
+		// 	console.error('Failed to load config:', error);
+		// 	setLoaded(true);
+		// }
 	};
 
 	const checkOAuthCallback = async () => {
-		const hash = window.location.hash.substring(1);
-		if (!hash) return;
-
-		const params = new URLSearchParams(hash);
-		const token = params.get('token');
-		if (!token) return;
-
-		try {
-			const sessionUser = await getSessionUser(token);
-			localStorage.setItem('token', token);
-			await handleSuccessfulAuth(sessionUser);
-		} catch (error) {
-			console.error('OAuth authentication failed:', error);
-		}
-	};
-
-	const handleSuccessfulAuth = async (sessionUser: User) => {
-		console.log('Successfully authenticated:', sessionUser);
-		if (sessionUser.token) {
-			localStorage.setItem('token', sessionUser.token);
-		}
-
-		const redirectPath = searchParams.get('redirect') || '/';
-		navigate(redirectPath);
+		// const hash = window.location.hash.substring(1);
+		// if (!hash) return;
+		// const params = new URLSearchParams(hash);
+		// const token = params.get('token');
+		// if (!token) return;
+		// try {
+		// 	const sessionUser = await getSessionUser(token);
+		// 	localStorage.setItem('token', token);
+		// 	await handleSuccessfulAuth(sessionUser);
+		// } catch (error) {
+		// 	console.error('OAuth authentication failed:', error);
+		// }
 	};
 
 	const checkAgreeTerms = () => {
@@ -115,40 +93,40 @@ const AuthPage: React.FC = () => {
 	};
 
 	const signInHandler = async () => {
-		setIsLoading(true);
-		try {
-			const response = await userSignIn(email, password);
-			await handleSuccessfulAuth(response.user);
-		} catch (error: unknown) {
-			alert(error instanceof Error ? error.message : 'An error occurred');
-		} finally {
-			setIsLoading(false);
-		}
+		// setIsLoading(true);
+		// try {
+		// 	const response = await userSignIn(email, password);
+		// 	await handleSuccessfulAuth(response.user);
+		// } catch (error: unknown) {
+		// 	alert(error instanceof Error ? error.message : 'An error occurred');
+		// } finally {
+		// 	setIsLoading(false);
+		// }
 	};
 
 	const signUpHandler = async () => {
 		setIsLoading(true);
-		try {
-			const profileImageUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=00EC97&color=fff`;
-			const response = await userSignUp(name, email, password, profileImageUrl);
-			await handleSuccessfulAuth(response.user);
-		} catch (error: unknown) {
-			alert(error instanceof Error ? error.message : 'An error occurred');
-		} finally {
-			setIsLoading(false);
-		}
+		// try {
+		// 	const profileImageUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=00EC97&color=fff`;
+		// 	const response = await userSignUp(name, email, password, profileImageUrl);
+		// 	await handleSuccessfulAuth(response.user);
+		// } catch (error: unknown) {
+		// 	alert(error instanceof Error ? error.message : 'An error occurred');
+		// } finally {
+		// 	setIsLoading(false);
+		// }
 	};
 
 	const ldapSignInHandler = async () => {
-		setIsLoading(true);
-		try {
-			const response = await ldapUserSignIn(ldapUsername, password);
-			await handleSuccessfulAuth(response.user);
-		} catch (error: unknown) {
-			alert(error instanceof Error ? error.message : 'An error occurred');
-		} finally {
-			setIsLoading(false);
-		}
+		// setIsLoading(true);
+		// try {
+		// 	const response = await ldapUserSignIn(ldapUsername, password);
+		// 	await handleSuccessfulAuth(response.user);
+		// } catch (error: unknown) {
+		// 	alert(error instanceof Error ? error.message : 'An error occurred');
+		// } finally {
+		// 	setIsLoading(false);
+		// }
 	};
 
 	const submitHandler = async (e: React.FormEvent) => {

@@ -104,10 +104,29 @@ export interface ChatCompletionStreamResponse {
 // Model types
 export interface Model {
 	id: string;
-	name: string;
-	object: 'model';
+	object: string;
 	created: number;
 	owned_by: string;
+	name: string;
+	openai?: {
+		id: string;
+		object: string;
+		created: number;
+		owned_by: string;
+	};
+	urlIdx?: number;
+	info?: {
+		id: string;
+		user_id: string;
+		base_model_id: string | null;
+		name: string;
+		params: Record<string, unknown>;
+		meta: {
+			profile_image_url?: string;
+			description?: string;
+			[key: string]: unknown;
+		};
+	};
 }
 
 // Settings types
@@ -193,13 +212,16 @@ export interface ChatStore {
 	chats: Chat[];
 	currentChatId: string | null;
 	isLoading: boolean;
-	models: string[];
+	models: Model[];
+	selectedModels: string[];
 	setChats: (chats: Chat[]) => void;
+	setModels: (models: Model[]) => void;
 	setCurrentChatId: (id: string | null) => void;
 	addChat: (chat: Chat) => void;
 	updateChat: (id: string, chat: Partial<Chat>) => void;
 	deleteChat: (id: string) => void;
 	setLoading: (loading: boolean) => void;
+	setSelectedModels: (models: string[]) => void;
 }
 
 export interface SettingsStore {

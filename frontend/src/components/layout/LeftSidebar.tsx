@@ -27,7 +27,7 @@ import {
 } from '../ui/dropdown-menu';
 import { useChatStore } from '@/stores/useChatStore';
 import type { Chat } from '@/types';
-import { getTimeRange } from '@/lib/utils';
+import { cn, getTimeRange } from '@/lib/utils';
 
 export const DropdownType = { Item: 'Item', Separator: 'Separator' } as const;
 
@@ -55,7 +55,7 @@ const LeftSidebar: React.FC = () => {
 	const chatsGroupedByFolder = useMemo(
 		() =>
 			Object.entries(
-				chats.reduce(
+				chats?.reduce(
 					(acc, chat) => {
 						const timeRange = getTimeRange(chat.updated_at);
 						acc[timeRange] = [...(acc[timeRange] || []), chat];
@@ -66,7 +66,7 @@ const LeftSidebar: React.FC = () => {
 			),
 		[chats]
 	);
-
+	console.log('chatsGroupedByFolder', chatsGroupedByFolder);
 	const [isChatsOpen, setIsChatsOpen] = useState(true);
 
 	return (
@@ -136,11 +136,16 @@ const LeftSidebar: React.FC = () => {
 								</div>
 							</div>
 						</div>
-						<div className="flex flex-col gap-2 w-full flex justify-between rounded-lg  py-[6px]  group-hover:bg-gray-100 dark:group-hover:bg-gray-950 whitespace-nowrap text-ellipsis">
+						<div className="flex flex-col  w-full flex justify-between rounded-lg  py-[6px]  group-hover:bg-gray-100 dark:group-hover:bg-gray-950 whitespace-nowrap text-ellipsis">
 							{isChatsOpen &&
-								chatsGroupedByFolder.map(([timeRange, chats]) => (
+								chatsGroupedByFolder.map(([timeRange, chats], index) => (
 									<div>
-										<div className="w-full 5 text-xs text-gray-500 pl-2.5 dark:text-gray-500 font-medium  pb-1.5">
+										<div
+											className={cn(
+												'w-full 5 text-xs text-gray-500 pl-2.5 dark:text-gray-500 font-medium  pb-1.5',
+												index !== 0 && 'pt-5'
+											)}
+										>
 											{timeRange}
 										</div>
 										{chats.map((chat) => (

@@ -20,6 +20,7 @@
     "@heroicons/react": "^2.2.0",
     "@noble/hashes": "^1.8.0",
     "@noble/secp256k1": "^2.3.0",
+    "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tailwindcss/container-queries": "^0.1.1",
