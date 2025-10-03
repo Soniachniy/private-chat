@@ -1,5 +1,6 @@
 import type { OAuth2Provider, SessionUser } from '@/types';
 import { TEMP_API_BASE_URL } from './constants';
+
 class AuthClient {
 	private baseURL: string;
 
