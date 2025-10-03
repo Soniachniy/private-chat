@@ -1,47 +1,78 @@
 import { TEMP_API_BASE_URL } from './constants';
 
-export const getModelAttestationReport = async ({
-	token,
-	model,
-	url = `${TEMP_API_BASE_URL}/api`
-}: GetModelAttestationReportParams): Promise<ModelAttestationReport> => {
-	const res = await fetch(`${url}/attestation/report?model=${encodeURIComponent(model)}`, {
-		method: 'GET',
-		headers: {
-			Authorization: `Bearer ${token}`,
-			Accept: 'application/json'
-		}
-	});
-	return res.json();
-};
+class NearAIClient {
+	private baseURL: string;
 
-export const getMessageSignature = async ({
-	token,
-	model,
-	chatCompletionId,
-	url = `${TEMP_API_BASE_URL}/api`,
-	signingAlgorithm = 'ecdsa'
-}: GetMessageSignatureParams): Promise<MessageSignature> => {
-	const res = await fetch(
-		`${url}/signature/${encodeURIComponent(chatCompletionId)}?model=${encodeURIComponent(model)}&signing_algo=${encodeURIComponent(signingAlgorithm)}`,
-		{
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${token}`,
-				Accept: 'application/json'
+	constructor(baseURL: string = TEMP_API_BASE_URL) {
+		this.baseURL = `${baseURL}/api/v1`;
+		console.log('NearAIClient constructor', this.baseURL);
+	}
+
+	private async request<T>(
+		endpoint: string,
+		options: RequestInit = {}
+	): Promise<T> {
+		try {
+			const response = await fetch(`${this.baseURL}${endpoint}`, {
+				...options,
+				headers: {
+					Accept: 'application/json',
+					...options.headers
+				}
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				throw error;
 			}
-		}
-	);
-	return res.json();
-};
 
+			return await response.json();
+		} catch (err) {
+			console.error(err);
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			throw (err as any)?.detail || err || 'An unknown error occurred';
+		}
+	}
+
+	async getModelAttestationReport(
+		token: string,
+		model: string
+	): Promise<ModelAttestationReport> {
+		return this.request<ModelAttestationReport>(
+			`/attestation/report?model=${encodeURIComponent(model)}`,
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`
+				}
+			}
+		);
+	}
+
+	async getMessageSignature(
+		token: string,
+		model: string,
+		chatCompletionId: string,
+		signingAlgorithm: SigningAlgorithm = 'ecdsa'
+	): Promise<MessageSignature> {
+		return this.request<MessageSignature>(
+			`/signature/${encodeURIComponent(chatCompletionId)}?model=${encodeURIComponent(model)}&signing_algo=${encodeURIComponent(signingAlgorithm)}`,
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`
+				}
+			}
+		);
+	}
+}
+
+export const nearAIClient = new NearAIClient();
+
+// Type definitions
 export type Address = `0x${string}`;
 
-export type GetModelAttestationReportParams = {
-	url?: string;
-	token: string;
-	model: string;
-};
+export type SigningAlgorithm = 'ecdsa';
 
 export type ModelAttestationReport = {
 	signing_address: Address;
@@ -52,16 +83,6 @@ export type ModelAttestationReport = {
 		nvidia_payload: string;
 		intel_quote: string;
 	}>;
-};
-
-export type SigningAlgorithm = 'ecdsa';
-
-export type GetMessageSignatureParams = {
-	url?: string;
-	token: string;
-	model: string;
-	chatCompletionId: string; // chatCompletionId from LLM provider in the format of chatcmpl-7b0995f4d1674775877a0532ffe949d9
-	signingAlgorithm?: SigningAlgorithm;
 };
 
 export type MessageSignature = {

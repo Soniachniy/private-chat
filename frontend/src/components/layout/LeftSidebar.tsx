@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import i18n from 'i18next';
 
 import { useUserStore } from '../../stores/useUserStore';
 import UserIcon from '@/assets/icons/user-icon.png';
@@ -32,24 +31,20 @@ import SettingsDialog from '@/components/common/dialogs/settings/SettingsDialog'
 import { useTranslation } from 'react-i18next';
 import ArchivedChatsModal from '@/components/common/dialogs/archived-chats/ArchivedChatsModal';
 import type { ChatInfo } from '@/types';
+import { Link, useNavigate } from 'react-router';
+import { APP_ROUTES, toChatRoute } from '@/pages/routes';
+import { authClient } from '@/api/auth';
 
 export const DropdownType = { Item: 'Item', Separator: 'Separator' } as const;
 
-const chatDropdownItems = [
-	{ title: i18n.t('Pin'), icon: <Bookmark stroke="white" />, type: DropdownType.Item },
-	{ title: i18n.t('Rename'), icon: <Pencil stroke="white" />, type: DropdownType.Item },
-	{ title: i18n.t('Clone'), icon: <Clone stroke="white" />, type: DropdownType.Item },
-	{ title: i18n.t('Archive'), icon: <Archive stroke="white" />, type: DropdownType.Item },
-	{ title: i18n.t('Download'), icon: <Download stroke="white" />, type: DropdownType.Item },
-	{ title: i18n.t('Delete'), icon: <Trash stroke="white" />, type: DropdownType.Item }
-];
-
 const LeftSidebar: React.FC = () => {
+	const navigate = useNavigate();
 	const { t } = useTranslation('translation', { useSuspense: false });
 	const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 	const [isArchivedChatsOpen, setIsArchivedChatsOpen] = useState(false);
 	const { isLeftSidebarOpen, setIsLeftSidebarOpen } = useViewStore();
-	const { user } = useUserStore();
+	const user = useUserStore((state) => state.user);
+	const setUser = useUserStore((state) => state.setUser);
 	const { chats, currentChat } = useChatStore();
 
 	const chatsGroupedByFolder = useMemo(
@@ -69,6 +64,16 @@ const LeftSidebar: React.FC = () => {
 
 	const [isChatsOpen, setIsChatsOpen] = useState(true);
 
+	//TODO: add actions to the chat dropdown items
+	const chatDropdownItems = useMemo(() => [
+		{ title: t('Pin'), icon: <Bookmark stroke="white" />, type: DropdownType.Item },
+		{ title: t('Rename'), icon: <Pencil stroke="white" />, type: DropdownType.Item },
+		{ title: t('Clone'), icon: <Clone stroke="white" />, type: DropdownType.Item },
+		{ title: t('Archive'), icon: <Archive stroke="white" />, type: DropdownType.Item },
+		{ title: t('Download'), icon: <Download stroke="white" />, type: DropdownType.Item },
+		{ title: t('Delete'), icon: <Trash stroke="white" />, type: DropdownType.Item }
+	], [t]);
+
 	const dropdownItems = useMemo(
 		() => [
 			{
@@ -84,10 +89,18 @@ const LeftSidebar: React.FC = () => {
 				action: () => setIsArchivedChatsOpen(true)
 			},
 			{ type: DropdownType.Separator },
-			//TODO: add sign out action
-			{ title: t('Sign Out'), icon: <SignOutIcon />, type: DropdownType.Item, action: () => {} }
+			{ title: t('Sign Out'), icon: <SignOutIcon />, type: DropdownType.Item, action: async () => {
+				try {
+					await authClient.signOut();
+					setUser(null);
+					localStorage.removeItem('token');
+					navigate(APP_ROUTES.AUTH);
+				} catch (error) {
+					console.error('Error signing out', error);
+				}
+			} }
 		],
-		[t]
+		[t, navigate, setUser]
 	);
 
 	return (
@@ -185,12 +198,12 @@ const LeftSidebar: React.FC = () => {
 											</div>
 											{chats.map((chat) => (
 												<div className="w-full  relative group" key={chat.id} draggable="true">
-													<a
+													<Link
 														className={
 															`w-full flex justify-between rounded-lg px-[11px] py-[6px] whitespace-nowrap text-ellipsis` +
 															(chat.id === currentChat?.id ? ' bg-[#00ec9714]' : '')
 														}
-														href={`/c/${chat.id}`}
+														to={toChatRoute(chat.id)}
 														draggable="false"
 													>
 														<div className="flex self-center flex-1 w-full">
@@ -220,7 +233,7 @@ const LeftSidebar: React.FC = () => {
 																))}
 															</DropdownMenuContent>
 														</DropdownMenu>
-													</a>
+													</Link>
 												</div>
 											))}
 										</div>

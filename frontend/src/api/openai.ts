@@ -2,7 +2,7 @@ import type { Chat, Model, SessionUser, ChatInfo } from '../types';
 
 const API_BASE_URL = 'https://private-chat.near.ai/api';
 
-export class OpenAIClient {
+class OpenAIClient {
 	private apiKey: string;
 	private baseURL: string;
 

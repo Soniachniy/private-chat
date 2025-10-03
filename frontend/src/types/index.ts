@@ -1,3 +1,5 @@
+export type OAuth2Provider = 'google' | 'github' | "microsoft" | "oidc";
+
 export interface SessionUser {
 	id: string;
 	name: string;
@@ -198,15 +200,31 @@ export interface Settings {
 	chatBubble?: boolean;
 }
 
+
 // Config types
 export interface Config {
+	status?: boolean;
 	name: string;
 	version: string;
-	features: {
-		enable_websocket?: boolean;
-		enable_direct_connections?: boolean;
-	};
 	default_locale?: string;
+	oauth?: {
+		providers?: {
+			google?: boolean;
+			microsoft?: boolean;
+			github?: boolean;
+			oidc?: boolean;
+		};
+	};
+	features?: {
+		auth?: boolean;
+		auth_trusted_header?: boolean;
+		enable_ldap?: boolean;
+		enable_api_key?: boolean;
+		enable_signup?: boolean;
+		enable_login_form?: boolean;
+		enable_websocket?: boolean;
+	};
+	onboarding?: boolean;
 }
 
 // Banner types
@@ -281,6 +299,11 @@ export interface ChatStore {
 export interface SettingsStore {
 	settings: Settings;
 	setSettings: (settings: Partial<Settings>) => void;
+}
+
+export interface ConfigStore {
+	config: Config | null;
+	setConfig: (config: Config) => void;
 }
 
 // Chat History types

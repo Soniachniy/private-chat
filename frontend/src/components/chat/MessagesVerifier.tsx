@@ -5,7 +5,7 @@ import {
 	XCircleIcon,
 	ArrowTopRightOnSquareIcon
 } from '@heroicons/react/24/outline';
-import { getMessageSignature, type MessageSignature } from '@/api/nearai';
+import { nearAIClient, type MessageSignature } from '@/api/nearai';
 import { useMessagesSignaturesStore } from '@/stores/useMessagesSignaturesStore';
 import VerifySignatureDialog from './VerifySignatureDialog';
 import type { Message } from '@/types';
@@ -67,11 +67,11 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({ history, chatId }) 
 			setLoadingSignatures((prev) => new Set(prev).add(msg.chatCompletionId!));
 
 			try {
-				const data = await getMessageSignature({
+				const data = await nearAIClient.getMessageSignature(
 					token,
-					model: msg.model || 'gpt-3.5-turbo',
-					chatCompletionId: msg.chatCompletionId
-				});
+					msg.model || 'gpt-3.5-turbo',
+					msg.chatCompletionId
+				);
 				if (!data || !data.signature) {
 					const errorMsg =
 						data?.detail || data?.message || 'No signature data found for this message';
