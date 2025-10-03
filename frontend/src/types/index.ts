@@ -1,4 +1,4 @@
-export type OAuth2Provider = 'google' | 'github' | "microsoft" | "oidc";
+export type OAuth2Provider = 'google' | 'github' | 'microsoft' | 'oidc';
 
 export interface SessionUser {
 	id: string;
@@ -57,10 +57,19 @@ export interface Message {
 	content: string;
 	timestamp: number;
 	models: string[];
-	modelName: string;
+	modelName?: string;
 	chatCompletionId?: string;
 	done?: boolean;
 	model?: string;
+	error?: boolean;
+	sources?: unknown[];
+	files?: unknown[];
+	usage?: {
+		prompt_tokens?: number;
+		completion_tokens?: number;
+		total_tokens?: number;
+	};
+	statusHistory?: unknown[];
 }
 
 export interface ChatHistory {
@@ -200,7 +209,6 @@ export interface Settings {
 	chatBubble?: boolean;
 }
 
-
 // Config types
 export interface Config {
 	status?: boolean;
@@ -281,6 +289,7 @@ export interface ChatStore {
 	selectedModels: string[];
 	history: ChatHistory;
 	streamingMessage: Message | null;
+
 	setChats: (chats: ChatInfo[]) => void;
 	setCurrentChat: (chat: Chat | null) => void;
 	setModels: (models: Model[]) => void;
@@ -293,6 +302,7 @@ export interface ChatStore {
 	addMessage: (message: Message) => void;
 	updateMessage: (messageId: string, update: Partial<Message>) => void;
 	setStreamingMessage: (message: Message | null) => void;
+
 	appendToMessage: (messageId: string, content: string) => void;
 }
 

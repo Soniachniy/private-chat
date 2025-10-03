@@ -7,7 +7,6 @@ export const useChatStore = create<ChatStore>((set) => ({
 
 	currentChat: null,
 	setCurrentChat: (chat: Chat | null) => set({ currentChat: chat }),
-
 	isLoading: false,
 	models: [],
 	selectedModels: [''],

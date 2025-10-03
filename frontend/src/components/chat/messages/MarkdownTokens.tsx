@@ -259,7 +259,7 @@ const MarkdownTokens: React.FC<MarkdownTokensProps> = ({ tokens, id, top = false
 				if (token.type === 'details') {
 					// Parse the text content using marked lexer for recursive markdown parsing
 					const contentTokens = lexer(token.text || '');
-					console.log('contentTokens', token.text);
+
 					return (
 						<Collapsible key={key} title={token.summary} className="w-full space-y-1 mb-1.5">
 							<div className="mb-1.5">

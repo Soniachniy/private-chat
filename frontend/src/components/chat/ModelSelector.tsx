@@ -150,12 +150,12 @@ export default function ModelSelector() {
 	// Get available models for each selector (excluding already selected ones)
 	const getAvailableModelsForIndex = (currentIndex: number) => {
 		const otherSelectedModels = selectedModels.filter((_, idx) => idx !== currentIndex);
-		console.log('otherSelectedModels', models);
+
 		return models.filter((modelId) => !otherSelectedModels.includes(modelId.id));
 	};
 
 	const disabledAdd = selectedModels.length >= models.length;
-	console.log('models', models, getAvailableModelsForIndex(0));
+
 	return (
 		<div className="flex flex-col w-full items-start">
 			{selectedModels.map((selectedModel, selectedModelIdx) => (

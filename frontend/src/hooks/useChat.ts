@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { openAIClient } from '../api/openai';
 import { useChatStore } from '../stores/useChatStore';
-import type { ChatCompletionRequest, ChatInfo } from '../types';
+import type { ChatInfo } from '../types';
 
 export const useChats = () => {
 	const { setChats } = useChatStore();

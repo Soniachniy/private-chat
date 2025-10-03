@@ -6,13 +6,9 @@ class ConfigClient {
 
 	constructor(baseURL: string = TEMP_API_BASE_URL) {
 		this.baseURL = `${baseURL}/api`;
-		console.log('ConfigClient constructor', this.baseURL);
 	}
 
-	private async request<T>(
-		endpoint: string,
-		options: RequestInit = {}
-	): Promise<T> {
+	private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
 		try {
 			const response = await fetch(`${this.baseURL}${endpoint}`, {
 				...options,
@@ -38,9 +34,9 @@ class ConfigClient {
 	async getConfig(): Promise<Config> {
 		return this.request<Config>('/config', {
 			method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+			headers: {
+				'Content-Type': 'application/json'
+			}
 		});
 	}
 }

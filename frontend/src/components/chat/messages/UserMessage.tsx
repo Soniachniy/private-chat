@@ -83,7 +83,7 @@ const UserMessage: React.FC<UserMessageProps> = ({
 			toast.error('Failed to copy to clipboard');
 		}
 	};
-	console.log('message2222', editedContent, messageId, history, message);
+
 	if (!message) return null;
 
 	return (

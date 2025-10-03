@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { 
-	XMarkIcon, 
-	CheckIcon, 
+import {
+	XMarkIcon,
+	CheckIcon,
 	ClipboardDocumentIcon,
 	ChevronDownIcon,
 	ArrowPathIcon,
@@ -132,7 +132,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 	// Fetch data when component mounts or model changes
 	useEffect(() => {
 		const token = localStorage.getItem('token');
-		console.log('fetchAttestationReport', show, autoVerify, model, token);
+
 		if ((show || autoVerify) && model && token) {
 			fetchAttestationReport();
 		}
@@ -182,7 +182,9 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 				<div className="p-6">
 					{/* Model Info */}
 					<div className="mb-4">
-						<p className="text-sm font-medium text-gray-900 dark:text-white mb-2">{t('Verified Model')}</p>
+						<p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+							{t('Verified Model')}
+						</p>
 						<p className="text-sm text-gray-600 dark:text-gray-400">{model}</p>
 					</div>
 
@@ -204,14 +206,18 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 
 					{/* Description */}
 					<p className="text-gray-700 dark:text-gray-300 mb-6">
-						{t('This automated verification tool lets you independently confirm that the model is running in the TEE (Trusted Execution Environment).')}
+						{t(
+							'This automated verification tool lets you independently confirm that the model is running in the TEE (Trusted Execution Environment).'
+						)}
 					</p>
 
 					{/* Loading State */}
 					{loading && (
 						<div className="flex items-center justify-center py-8">
 							<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[rgba(0,236,151,1)]"></div>
-							<span className="ml-3 text-gray-600 dark:text-gray-400">{t('Verifying attestation...')}</span>
+							<span className="ml-3 text-gray-600 dark:text-gray-400">
+								{t('Verifying attestation...')}
+							</span>
 						</div>
 					)}
 
@@ -238,7 +244,9 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 										<div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
 											<CheckIcon className="w-4 h-4 text-white" />
 										</div>
-										<span className="font-medium text-gray-900 dark:text-white">{t('GPU Attestation')}</span>
+										<span className="font-medium text-gray-900 dark:text-white">
+											{t('GPU Attestation')}
+										</span>
 									</div>
 									<ChevronDownIcon
 										className={`w-5 h-5 text-gray-400 transform transition-transform ${
@@ -259,7 +267,9 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 													</span>
 												</div>
 												<p className="text-xs text-green-800 dark:text-green-200 mb-3">
-													{t("This verification uses NVIDIA's Remote Attestation Service (NRAS) to prove that your model is running on genuine NVIDIA hardware in a secure environment. You can independently verify the attestation evidence using NVIDIA's public API.")}
+													{t(
+														"This verification uses NVIDIA's Remote Attestation Service (NRAS) to prove that your model is running on genuine NVIDIA hardware in a secure environment. You can independently verify the attestation evidence using NVIDIA's public API."
+													)}
 												</p>
 												<div className="space-y-1">
 													<a
@@ -346,7 +356,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 												</div>
 											)}
 
-												{/* Architecture Section */}
+											{/* Architecture Section */}
 											<div>
 												<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
 													{t('Architecture')}:
@@ -389,7 +399,9 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 										<div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
 											<CheckIcon className="w-4 h-4 text-white" />
 										</div>
-										<span className="font-medium text-gray-900 dark:text-white">{t('TDX Attestation')}</span>
+										<span className="font-medium text-gray-900 dark:text-white">
+											{t('TDX Attestation')}
+										</span>
 									</div>
 									<ChevronDownIcon
 										className={`w-5 h-5 text-gray-400 transform transition-transform ${
@@ -410,9 +422,11 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 													</span>
 												</div>
 												<p className="text-xs text-green-800 dark:text-green-200 mb-3">
-													{t('Intel TDX (Trust Domain Extensions) provides hardware-based attestation for confidential computing. You can verify the authenticity of this TDX quote using Phala\'s TEE Attestation Explorer - an open source tool for analyzing Intel attestation reports.')}
+													{t(
+														"Intel TDX (Trust Domain Extensions) provides hardware-based attestation for confidential computing. You can verify the authenticity of this TDX quote using Phala's TEE Attestation Explorer - an open source tool for analyzing Intel attestation reports."
+													)}
 												</p>
-											<div className="space-y-1">
+												<div className="space-y-1">
 													<a
 														href="https://proof.t16z.com/"
 														target="_blank"
@@ -431,7 +445,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 														<ArrowTopRightOnSquareIcon className="w-3 h-3 mr-1" />
 														{t('Learn about Intel TDX')}
 													</a>
-											</div>
+												</div>
 											</div>
 
 											{/* Quote Section */}

@@ -5,13 +5,9 @@ class NearAIClient {
 
 	constructor(baseURL: string = TEMP_API_BASE_URL) {
 		this.baseURL = `${baseURL}/api`;
-		console.log('NearAIClient constructor', this.baseURL);
 	}
 
-	private async request<T>(
-		endpoint: string,
-		options: RequestInit = {}
-	): Promise<T> {
+	private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
 		try {
 			const response = await fetch(`${this.baseURL}${endpoint}`, {
 				...options,
@@ -34,10 +30,7 @@ class NearAIClient {
 		}
 	}
 
-	async getModelAttestationReport(
-		token: string,
-		model: string
-	): Promise<ModelAttestationReport> {
+	async getModelAttestationReport(token: string, model: string): Promise<ModelAttestationReport> {
 		return this.request<ModelAttestationReport>(
 			`/attestation/report?model=${encodeURIComponent(model)}`,
 			{

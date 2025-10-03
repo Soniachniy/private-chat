@@ -9,7 +9,6 @@ class OpenAIClient {
 	constructor(apiKey: string = '', baseURL: string = API_BASE_URL) {
 		this.apiKey = apiKey;
 		this.baseURL = baseURL;
-		console.log('OpenAIClient constructor', this.apiKey, this.baseURL);
 	}
 
 	async getModels(): Promise<Model[]> {
@@ -56,7 +55,7 @@ class OpenAIClient {
 			}
 		});
 		const data = await response.json();
-		console.log('ChatInfo', response, data);
+
 		return data;
 	}
 
@@ -72,7 +71,7 @@ class OpenAIClient {
 			}
 		});
 		const data = await response.json();
-		console.log('response', response, data);
+
 		return data;
 	}
 

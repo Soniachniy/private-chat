@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import MessageInput from '@/components/chat/MessageInput';
 import ChatPlaceholder from '@/components/chat/ChatPlaceholder';
@@ -33,35 +33,23 @@ const Home: React.FC = () => {
 	const currentChatId = chatId || params.chatId;
 	const {
 		setCurrentChat,
-		chats,
-		history,
 		selectedModels,
 		addMessage,
 		addChat,
 		updateMessage,
 		setStreamingMessage,
-		models
+		models,
+		streamingMessage
 	} = useChatStore();
 
 	const { data: chat, isLoading: isChatLoading } = useChat(currentChatId);
 	const { socket } = useChatWebSocket();
-	const [messages, setMessages] = useState<Message[]>(chat?.chat.messages || []);
 
 	useEffect(() => {
 		if (currentChatId) {
 			setCurrentChat(chat || null);
 		}
 	}, [currentChatId, setCurrentChat, chat]);
-
-	useEffect(() => {
-		if (chat) {
-			setMessages(chat.chat.messages || []);
-		} else if (!currentChatId) {
-			// When no chat is selected, use history from store
-			const historyMessages = Object.values(history.messages);
-			setMessages(historyMessages);
-		}
-	}, [chat, currentChatId, chats, history]);
 
 	const handleSendMessage = async (content: string) => {
 		console.log('Send message:', content);
@@ -73,7 +61,6 @@ const Home: React.FC = () => {
 			},
 			{
 				onSuccess: (data) => {
-					// Navigate to the new chat if it was just created
 					if (!currentChatId && data.chatId) {
 						navigate(`/c/${data.chatId}`);
 					}
@@ -208,7 +195,7 @@ const Home: React.FC = () => {
 						}
 					],
 					stream: true,
-					session_id: socket?.id,
+					session_id: socket?.id || undefined,
 					chat_id: currentChatId,
 					message_id: assistantMessageId
 				})
@@ -232,6 +219,17 @@ const Home: React.FC = () => {
 		onError: (error) => {
 			console.error('Failed to send message:', error);
 			setStreamingMessage(null);
+			// Remove the assistant message if it was created but the request failed
+			if (currentChatId) {
+				// Mark the message as error if it exists in history
+				if (streamingMessage) {
+					updateMessage(streamingMessage.id, {
+						content: 'Failed to get response. Please try again.',
+						done: true,
+						error: true
+					});
+				}
+			}
 		}
 	});
 
@@ -258,6 +256,7 @@ const Home: React.FC = () => {
 			/>
 		);
 	}
+	const messages = Object.values(chat?.chat.history.messages || []);
 
 	return (
 		<div className="flex flex-col h-full bg-gray-900">
@@ -288,7 +287,7 @@ const Home: React.FC = () => {
 								deleteMessage={handleDeleteMessage}
 							/>
 						);
-					} else if (message.role === 'assistant') {
+					} else if (message.content === '' && !message.error) {
 						return <MessageSkeleton />;
 					} else {
 						// For assistant messages, check if it's a multi-response scenario

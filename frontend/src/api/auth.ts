@@ -5,13 +5,9 @@ class AuthClient {
 
 	constructor(baseURL: string = TEMP_API_BASE_URL) {
 		this.baseURL = `${baseURL}/api/v1`;
-		console.log('AuthClient constructor', this.baseURL);
 	}
 
-	private async request<T>(
-		endpoint: string,
-		options: RequestInit = {}
-	): Promise<T> {
+	private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
 		try {
 			const response = await fetch(`${this.baseURL}${endpoint}`, {
 				...options,
@@ -35,8 +31,8 @@ class AuthClient {
 	}
 
 	async getSessionUser(): Promise<SessionUser> {
-        const token = localStorage.getItem('token');
-        console.log('token', token);
+		const token = localStorage.getItem('token');
+
 		if (!token) {
 			throw new Error('No token found');
 		}
@@ -58,12 +54,7 @@ class AuthClient {
 		});
 	}
 
-	async signUp(
-		name: string,
-		email: string,
-		password: string,
-		profile_image_url: string
-	) {
+	async signUp(name: string, email: string, password: string, profile_image_url: string) {
 		return this.request('/auths/signup', {
 			method: 'POST',
 			body: JSON.stringify({
@@ -80,7 +71,7 @@ class AuthClient {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json'
-			},
+			}
 		})
 			.then(async (res) => {
 				if (!res.ok) throw await res.json();
@@ -117,9 +108,9 @@ class AuthClient {
 		});
 	}
 
-    oauth2SignIn(provider: OAuth2Provider) {
-        window.location.href = `${this.baseURL}/oauth/${provider}/login`;
-    }
+	oauth2SignIn(provider: OAuth2Provider) {
+		window.location.href = `${this.baseURL}/oauth/${provider}/login`;
+	}
 }
 
 export const authClient = new AuthClient();
