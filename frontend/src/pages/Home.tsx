@@ -78,7 +78,7 @@ const Home: React.FC = () => {
 		);
 	}
 
-	if (chat?.chat.messages?.length === 0) {
+	if (!currentChatId) {
 		return (
 			<ChatPlaceholder
 				submitVoice={async (voice) => {
