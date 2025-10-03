@@ -51,7 +51,7 @@ const LeftSidebar: React.FC = () => {
 	const { isLeftSidebarOpen, setIsLeftSidebarOpen } = useViewStore();
 	const { user } = useUserStore();
 	const { chats, currentChat } = useChatStore();
-
+	console.log('chats', chats);
 	const chatsGroupedByFolder = useMemo(
 		() =>
 			Object.entries(
@@ -66,7 +66,7 @@ const LeftSidebar: React.FC = () => {
 			),
 		[chats]
 	);
-
+	console.log('chatsGroupedByFolder', chatsGroupedByFolder);
 	const [isChatsOpen, setIsChatsOpen] = useState(true);
 
 	return (
@@ -148,47 +148,46 @@ const LeftSidebar: React.FC = () => {
 										>
 											{timeRange}
 										</div>
-										{currentChat &&
-											chats.map((chat) => (
-												<div className="w-full  relative group" key={chat.id} draggable="true">
-													<a
-														className={
-															`w-full flex justify-between rounded-lg px-[11px] py-[6px] whitespace-nowrap text-ellipsis` +
-															(chat.id === currentChat.id ? ' bg-[#00ec9714]' : '')
-														}
-														href={`/c/${chat.id}`}
-														draggable="false"
-													>
-														<div className="flex self-center flex-1 w-full">
-															<div
-																dir="auto"
-																className="text-left self-center text-white overflow-hidden w-full h-[20px]"
-															>
-																{chat.title}
-															</div>
+										{chats.map((chat) => (
+											<div className="w-full  relative group" key={chat.id} draggable="true">
+												<a
+													className={
+														`w-full flex justify-between rounded-lg px-[11px] py-[6px] whitespace-nowrap text-ellipsis` +
+														(chat.id === currentChat?.id ? ' bg-[#00ec9714]' : '')
+													}
+													href={`/c/${chat.id}`}
+													draggable="false"
+												>
+													<div className="flex self-center flex-1 w-full">
+														<div
+															dir="auto"
+															className="text-left self-center text-white overflow-hidden w-full h-[20px]"
+														>
+															{chat.title}
 														</div>
-														<DropdownMenu>
-															<DropdownMenuTrigger>
-																<EllipsisHorizontal
-																	className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"
-																	fill="white"
-																	stroke="white"
-																/>
-															</DropdownMenuTrigger>
-															<DropdownMenuContent
-																className="w-full bg-gray-875 min-w-[240px] outline-none ring-none border-none"
-																loop
-															>
-																{chatDropdownItems.map((item) => (
-																	<DropdownMenuItem className="flex flex-row gap-2 py-2 px-3 hover:bg-gray-800 focus:bg-gray-800 focus:text-white hover:text-white text-white">
-																		{item.icon} {item.title}
-																	</DropdownMenuItem>
-																))}
-															</DropdownMenuContent>
-														</DropdownMenu>
-													</a>
-												</div>
-											))}
+													</div>
+													<DropdownMenu>
+														<DropdownMenuTrigger>
+															<EllipsisHorizontal
+																className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"
+																fill="white"
+																stroke="white"
+															/>
+														</DropdownMenuTrigger>
+														<DropdownMenuContent
+															className="w-full bg-gray-875 min-w-[240px] outline-none ring-none border-none"
+															loop
+														>
+															{chatDropdownItems.map((item) => (
+																<DropdownMenuItem className="flex flex-row gap-2 py-2 px-3 hover:bg-gray-800 focus:bg-gray-800 focus:text-white hover:text-white text-white">
+																	{item.icon} {item.title}
+																</DropdownMenuItem>
+															))}
+														</DropdownMenuContent>
+													</DropdownMenu>
+												</a>
+											</div>
+										))}
 									</div>
 								))}
 						</div>
