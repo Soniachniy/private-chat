@@ -1,7 +1,10 @@
 import { create } from 'zustand';
 import { useUserStore } from './useUserStore';
 import { useChatStore } from './useChatStore';
-import { openAIClient } from '../api/openai';
+import { openAIClient } from '@/api/openai';
+import { authClient } from '@/api/auth';
+import { configClient } from '@/api/config';
+import { useConfigStore } from './useConfig';
 
 interface AppInitializationStore {
 	isInitialized: boolean;
@@ -19,14 +22,43 @@ export const useAppInitialization = create<AppInitializationStore>((set, get) =>
 		set({ isLoading: true });
 
 		try {
-			const [user, models] = await Promise.all([openAIClient.authUser(), openAIClient.getModels()]);
+			const config = await configClient.getConfig();
+			useConfigStore.getState().setConfig(config);
 
-			useChatStore.getState().setModels(models);
-			useUserStore.getState().setUser(user);
-			console.log('user', user);
-			if (user) {
-				const chats = await openAIClient.getChats();
-				useChatStore.getState().setChats(chats);
+			// Handle OAuth callback
+			const hash = window.location.hash.substring(1);
+			if (hash) {
+				const params = new URLSearchParams(hash);
+				const oauthToken = params.get('token');
+				if (oauthToken) {
+					localStorage.setItem('token', oauthToken);
+					window.history.replaceState(null, '', window.location.pathname);
+				}
+			}
+
+			const token = localStorage.getItem('token');
+			if (token) {
+				try {
+					const [user, models] = await Promise.all([
+						authClient.getSessionUser(),
+						openAIClient.getModels()
+					]);
+
+					useUserStore.getState().setUser(user);
+					useChatStore.getState().setModels(models);
+					console.log('User loaded:', user);
+
+					if (user) {
+						const chats = await openAIClient.getChats();
+						useChatStore.getState().setChats(chats);
+					}
+				} catch (error) {
+					console.error('Failed to load user data:', error);
+
+					//TODO: If the error indicates that the token has expired, it will be renewed.
+					localStorage.removeItem('token');
+					useUserStore.getState().setUser(null);
+				}
 			}
 
 			set({ isInitialized: true, isLoading: false });

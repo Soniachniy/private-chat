@@ -265,12 +265,6 @@ li p {
 	}
 }
 
-@keyframes spinner_AtaB {
-	100% {
-		transform: rotate(360deg);
-	}
-}
-
 /* Code block styling */
 pre[class*='language-'] {
 	position: relative;

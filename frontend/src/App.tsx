@@ -1,15 +1,17 @@
 import { useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router';
 import { Toaster } from 'sonner';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
 import LoadingScreen from './components/common/LoadingScreen';
 import WelcomePage from './pages/WelcomePage';
 import AuthPage from './pages/AuthPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 import { useAppInitialization } from './stores/useAppInitialization';
 
 import { useSettingsStore } from './stores/useSettingsStore';
+import { APP_ROUTES } from './pages/routes';
 
 function App() {
 	const { isInitialized, isLoading: isAppLoading, initializeApp } = useAppInitialization();
@@ -35,28 +37,20 @@ function App() {
 	};
 
 	return (
-		<div className="app relative bg-gray-900">
+		<div className="h-screen relative">
 			<Toaster theme={getToasterTheme()} richColors position="top-right" />
 			<Routes>
-				<Route
-					path="/"
-					element={
-						<Layout>
-							<Home />
-						</Layout>
-					}
-				/>
-				<Route
-					path="/c/:chatId"
-					element={
-						<Layout>
-							<Home />
-						</Layout>
-					}
-				/>
+				<Route element={
+					<ProtectedRoute>
+						<Layout />
+					</ProtectedRoute>
+				}>
+					<Route path={APP_ROUTES.HOME} element={<Home />} />
+					<Route path={APP_ROUTES.CHAT} element={<Home />} />
+				</Route>
 
-				<Route path="/welcome" element={<WelcomePage />} />
-				<Route path="/auth" element={<AuthPage />} />
+				<Route path={APP_ROUTES.WELCOME} element={<WelcomePage />} />
+				<Route path={APP_ROUTES.AUTH} element={<AuthPage />} />
 			</Routes>
 		</div>
 	);

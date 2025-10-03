@@ -1,7 +1,7 @@
 import SafeLogo from '@/assets/images/safe.svg';
 import { useCreateChat } from '@/hooks/useChat';
 import { useViewStore } from '@/stores/useViewStore';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router';
 import ModelSelector from './ModelSelector';
 
 export default function Navbar() {

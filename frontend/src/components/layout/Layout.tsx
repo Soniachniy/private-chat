@@ -1,16 +1,15 @@
 import React from 'react';
 import LeftSidebar from './LeftSidebar';
 import ChatVerifier from '../chat/ChatVerifier';
+import { Outlet } from 'react-router';
 
-interface LayoutProps {
-	children: React.ReactNode;
-}
-
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+const Layout: React.FC = () => {
 	return (
 		<div className="flex flex-row h-screen w-full">
 			<LeftSidebar />
-			<div className="w-full flex-1 relative">{children}</div>
+			<div className="w-full flex-1 relative">
+				<Outlet />
+			</div>
 			<ChatVerifier />
 		</div>
 	);
