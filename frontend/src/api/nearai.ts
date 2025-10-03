@@ -4,7 +4,7 @@ class NearAIClient {
 	private baseURL: string;
 
 	constructor(baseURL: string = TEMP_API_BASE_URL) {
-		this.baseURL = `${baseURL}/api/v1`;
+		this.baseURL = `${baseURL}/api`;
 		console.log('NearAIClient constructor', this.baseURL);
 	}
 
