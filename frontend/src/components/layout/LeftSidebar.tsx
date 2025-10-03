@@ -247,7 +247,7 @@ const LeftSidebar: React.FC = () => {
 										<>
 											<div className="self-center mr-3">
 												<img
-													src={UserIcon}
+													src={user?.profile_image_url || UserIcon}
 													alt="User"
 													className=" max-w-[30px] object-cover rounded-full"
 												/>

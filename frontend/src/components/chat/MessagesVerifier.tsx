@@ -171,7 +171,8 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({ history, chatId }) 
 		if (selectedMessageId) {
 			fetchMessageSignature(selectedMessageId);
 		}
-	}, [selectedMessageId, fetchMessageSignature]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [selectedMessageId]);
 
 	return (
 		<div className="space-y-4 h-full overflow-y-auto pb-4 px-4" ref={containerRef}>
