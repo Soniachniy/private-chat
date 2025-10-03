@@ -17,11 +17,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 	}
 
 	if (!user) {
-		return <Navigate to={APP_ROUTES.AUTH} replace />;
+		return <Navigate to={APP_ROUTES.WELCOME} replace />;
 	}
 
 	return <>{children}</>;
 };
 
 export default ProtectedRoute;
-

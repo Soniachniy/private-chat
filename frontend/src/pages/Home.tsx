@@ -246,14 +246,17 @@ const Home: React.FC = () => {
 
 	if (!currentChatId) {
 		return (
-			<ChatPlaceholder
-				submitVoice={async (voice) => {
-					await handleSendMessage(voice);
-				}}
-				submitPrompt={async (prompt) => {
-					await handleSendMessage(prompt);
-				}}
-			/>
+			<>
+				<Navbar />
+				<ChatPlaceholder
+					submitVoice={async (voice) => {
+						await handleSendMessage(voice);
+					}}
+					submitPrompt={async (prompt) => {
+						await handleSendMessage(prompt);
+					}}
+				/>
+			</>
 		);
 	}
 	const messages = Object.values(chat?.chat.history.messages || []);

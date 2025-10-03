@@ -15,9 +15,13 @@ import ChatPlaceholder from '@/components/chat/ChatPlaceholder';
 const WelcomePage: React.FC = () => {
 	const navigate = useNavigate();
 
-	const gotoAuth = async (value: string) => {
-		sessionStorage.setItem('welcome-prompt', value);
-		navigate('/auth');
+	const gotoAuth = async () => {
+		const token = localStorage.getItem('token');
+		if (token) {
+			navigate('/');
+		} else {
+			navigate('/auth');
+		}
 	};
 
 	return (
@@ -45,7 +49,7 @@ const WelcomePage: React.FC = () => {
 							<button
 								type="button"
 								className="bg-gray-700/5 font-semibold hover:bg-gray-700 dark:bg-gray-750 dark:hover:bg-gray-100/10 dark:text-gray-300 dark:hover:text-white transition rounded-lg text-sm py-2.5 px-5"
-								onClick={() => gotoAuth('')}
+								onClick={gotoAuth}
 							>
 								Sign In & Sign Up
 							</button>
@@ -56,7 +60,7 @@ const WelcomePage: React.FC = () => {
 				<button
 					type="button"
 					className="bg-gray-700/5 hover:bg-gray-700/10 dark:bg-gray-750 dark:hover:bg-gray-100/10 dark:text-gray-300 dark:hover:text-white transition rounded-lg font-semibold text-sm py-2.5 px-5"
-					onClick={() => gotoAuth('')}
+					onClick={gotoAuth}
 				>
 					Sign In & Sign Up
 				</button>
