@@ -23,7 +23,7 @@ export const useAppInitialization = create<AppInitializationStore>((set, get) =>
 
 			useChatStore.getState().setModels(models);
 			useUserStore.getState().setUser(user);
-
+			console.log('user', user);
 			if (user) {
 				const chats = await openAIClient.getChats();
 				useChatStore.getState().setChats(chats);
