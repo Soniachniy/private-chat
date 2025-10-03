@@ -49,9 +49,3 @@ export const useDeleteChat = () => {
 		}
 	});
 };
-
-export const useChatCompletion = () => {
-	return useMutation({
-		mutationFn: (request: ChatCompletionRequest) => openAIClient.createChatCompletion(request)
-	});
-};

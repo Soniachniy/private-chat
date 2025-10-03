@@ -125,7 +125,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
 	selectedToolIds: initialSelectedToolIds = [],
 	imageGenerationEnabled: initialImageGenerationEnabled = false,
 	webSearchEnabled: initialWebSearchEnabled = false,
-
 	placeholder = '',
 	onSubmit = () => {}
 }) => {
@@ -345,6 +344,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
 		e.preventDefault();
 		if (prompt.trim() || files.length > 0) {
 			onSubmit(prompt);
+			setPrompt('');
 		}
 	};
 
@@ -394,6 +394,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
 				e.preventDefault();
 				if (prompt !== '' || files.length > 0) {
 					onSubmit(prompt);
+					setPrompt('');
 				}
 			}
 		}

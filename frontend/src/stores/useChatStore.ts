@@ -1,14 +1,19 @@
 import { create } from 'zustand';
-import type { Chat, ChatInfo, ChatStore, Model } from '../types';
+import type { Chat, ChatInfo, ChatStore, Model, Message, ChatHistory } from '../types';
 
 export const useChatStore = create<ChatStore>((set) => ({
 	chats: [],
+	setChats: (chats: ChatInfo[]) => set({ chats }),
+
 	currentChat: null,
+	setCurrentChat: (chat: Chat | null) => set({ currentChat: chat }),
+
 	isLoading: false,
 	models: [],
 	selectedModels: [''],
-	setChats: (chats: ChatInfo[]) => set({ chats }),
-	setCurrentChat: (chat: Chat | null) => set({ currentChat: chat }),
+	history: { messages: {}, currentId: null },
+	streamingMessage: null,
+
 	setModels: (models: Model[]) => set({ models }),
 
 	addChat: (chat: ChatInfo) => set((state) => ({ chats: [chat, ...state.chats] })),
@@ -24,5 +29,55 @@ export const useChatStore = create<ChatStore>((set) => ({
 		})),
 
 	setLoading: (loading: boolean) => set({ isLoading: loading }),
-	setSelectedModels: (models: string[]) => set({ selectedModels: models })
+	setSelectedModels: (models: string[]) => set({ selectedModels: models }),
+
+	// Message management
+	setHistory: (history: ChatHistory) => set({ history }),
+
+	addMessage: (message: Message) =>
+		set((state) => ({
+			history: {
+				...state.history,
+				messages: {
+					...state.history.messages,
+					[message.id]: message
+				},
+				currentId: message.id
+			}
+		})),
+
+	updateMessage: (messageId: string, update: Partial<Message>) =>
+		set((state) => ({
+			history: {
+				...state.history,
+				messages: {
+					...state.history.messages,
+					[messageId]: {
+						...state.history.messages[messageId],
+						...update
+					}
+				}
+			}
+		})),
+
+	setStreamingMessage: (message: Message | null) => set({ streamingMessage: message }),
+
+	appendToMessage: (messageId: string, content: string) =>
+		set((state) => {
+			const message = state.history.messages[messageId];
+			if (!message) return state;
+
+			return {
+				history: {
+					...state.history,
+					messages: {
+						...state.history.messages,
+						[messageId]: {
+							...message,
+							content: message.content + content
+						}
+					}
+				}
+			};
+		})
 }));

@@ -26,10 +26,10 @@ const UserMessage: React.FC<UserMessageProps> = ({
 	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
 	const [edit, setEdit] = useState(false);
-	const [editedContent, setEditedContent] = useState('');
 	const messageEditTextAreaRef = useRef<HTMLTextAreaElement>(null);
 
 	const message = history.messages[messageId];
+	const [editedContent, setEditedContent] = useState(message.content);
 
 	useEffect(() => {
 		if (edit && messageEditTextAreaRef.current) {
@@ -83,7 +83,7 @@ const UserMessage: React.FC<UserMessageProps> = ({
 			toast.error('Failed to copy to clipboard');
 		}
 	};
-
+	console.log('message2222', editedContent, messageId, history, message);
 	if (!message) return null;
 
 	return (
@@ -164,15 +164,13 @@ const UserMessage: React.FC<UserMessageProps> = ({
 							) : (
 								<div className="w-full">
 									<div className={`flex justify-end pb-1`}>
-										{/* <div
-											className={`rounded-xl ${`max-w-[90%] px-4 py-2 bg-gray-50 dark:bg-gray-850 ${
-												message.files ? 'rounded-tr-lg' : ''
-											}`}`}
+										<div
+											className={`rounded-xl ${`max-w-[90%] px-4 py-2 bg-gray-50 dark:bg-gray-850 `}`}
 										>
 											{message.content && (
 												<div className="whitespace-pre-wrap">{message.content}</div>
 											)}
-										</div> */}
+										</div>
 									</div>
 
 									<div className={`flex justify-end text-gray-600 dark:text-gray-500`}>

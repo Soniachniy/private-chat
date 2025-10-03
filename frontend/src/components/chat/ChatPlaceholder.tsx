@@ -25,11 +25,16 @@ const ChatPlaceholder: React.FC<ChatPlaceholderProps> = ({ submitPrompt, submitV
 	const handlePromptClick = (content: string) => {
 		setInputValue(content);
 	};
+	const handleSubmit = (value: string) => {
+		submitPrompt(value);
+		setInputValue('');
+	};
 
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		const enterPressed = e.key === 'Enter' || e.keyCode === 13;
 		if (enterPressed && inputValue) {
 			submitPrompt(inputValue);
+			setInputValue('');
 		}
 	};
 
@@ -115,7 +120,7 @@ const ChatPlaceholder: React.FC<ChatPlaceholderProps> = ({ submitPrompt, submitV
 														<button
 															className="bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-100 transition rounded-full p-1.5 self-center"
 															type="button"
-															onClick={() => submitPrompt(inputValue)}
+															onClick={() => handleSubmit(inputValue)}
 															aria-label="Send message"
 														>
 															<svg

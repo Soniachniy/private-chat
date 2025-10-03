@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import MessageInput from '@/components/chat/MessageInput';
 import ChatPlaceholder from '@/components/chat/ChatPlaceholder';
 import UserMessage from '@/components/chat/messages/UserMessage';
@@ -7,24 +7,45 @@ import ResponseMessage from '@/components/chat/messages/ResponseMessage';
 import MultiResponseMessages from '@/components/chat/messages/MultiResponseMessages';
 import { useChat } from '@/hooks/useChat';
 import { useChatStore } from '@/stores/useChatStore';
+import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 
 import type { Message, ChatHistory } from '@/types';
-import NearAIIcon from '@/assets/icons/near-icon-green.svg?react';
 
+import { v4 as uuidv4 } from 'uuid';
 import Navbar from '@/components/chat/Navbar';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { TEMP_API_BASE_URL } from '@/api/constants';
+import { openAIClient } from '@/api/openai';
+import MessageSkeleton from '@/components/chat/MessageSkeleton';
+
+interface SendPromptParams {
+	prompt: string;
+	chatId?: string;
+	model?: string;
+	files?: File[];
+}
 
 const Home: React.FC = () => {
 	const { chatId } = useParams<{ chatId: string }>();
 	const params = useParams();
-	// const navigate = useNavigate();
+	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 	const currentChatId = chatId || params.chatId;
-	const { setCurrentChat, chats } = useChatStore();
-
-	const [messages, setMessages] = useState<Message[]>([]);
-	const [isLoading] = useState(false);
+	const {
+		setCurrentChat,
+		chats,
+		history,
+		selectedModels,
+		addMessage,
+		addChat,
+		updateMessage,
+		setStreamingMessage,
+		models
+	} = useChatStore();
 
 	const { data: chat, isLoading: isChatLoading } = useChat(currentChatId);
-	// const createChatMutation = useCreateChat();
+	const { socket } = useChatWebSocket();
+	const [messages, setMessages] = useState<Message[]>(chat?.chat.messages || []);
 
 	useEffect(() => {
 		if (currentChatId) {
@@ -34,15 +55,31 @@ const Home: React.FC = () => {
 
 	useEffect(() => {
 		if (chat) {
-			console.log('chat', chat);
 			setMessages(chat.chat.messages || []);
 		} else if (!currentChatId) {
-			setMessages([]);
+			// When no chat is selected, use history from store
+			const historyMessages = Object.values(history.messages);
+			setMessages(historyMessages);
 		}
-	}, [chat, currentChatId, chats]);
+	}, [chat, currentChatId, chats, history]);
 
 	const handleSendMessage = async (content: string) => {
 		console.log('Send message:', content);
+
+		sendPromptMutation(
+			{
+				prompt: content,
+				chatId: currentChatId
+			},
+			{
+				onSuccess: (data) => {
+					// Navigate to the new chat if it was just created
+					if (!currentChatId && data.chatId) {
+						navigate(`/c/${data.chatId}`);
+					}
+				}
+			}
+		);
 	};
 
 	const handleEditMessage = (messageId: string, content: string) => {
@@ -67,6 +104,137 @@ const Home: React.FC = () => {
 		console.log('Merge responses');
 	};
 
+	const { mutate: sendPromptMutation } = useMutation({
+		mutationFn: async ({ prompt, chatId, model, files }: SendPromptParams) => {
+			const token = localStorage.getItem('token');
+			if (!token) throw new Error('No token found');
+
+			// Validate
+			if (!prompt && (!files || files.length === 0)) {
+				throw new Error('Please enter a prompt');
+			}
+
+			const selectedModel = model || selectedModels[0];
+			if (!selectedModel || selectedModel === '') {
+				throw new Error('Model not selected');
+			}
+
+			// Create user message
+			const userMessageId = uuidv4();
+			const userMessage: Message = {
+				id: userMessageId,
+				parentId: null,
+				childrenIds: [],
+				role: 'user',
+				content: prompt,
+				timestamp: Math.floor(Date.now() / 1000),
+				models: [selectedModel],
+				modelName: '',
+				done: true
+			};
+
+			// Add user message to store
+			addMessage(userMessage);
+
+			// Create assistant message
+			const assistantMessageId = uuidv4();
+			const modelInfo = models.find((m) => m.id === selectedModel);
+			const assistantMessage: Message = {
+				id: assistantMessageId,
+				parentId: userMessageId,
+				childrenIds: [],
+				role: 'assistant',
+				content: '',
+				timestamp: Math.floor(Date.now()),
+				models: [selectedModel],
+				modelName: modelInfo?.name || selectedModel,
+				model: selectedModel,
+				done: false
+			};
+
+			// Add assistant message to store
+			addMessage(assistantMessage);
+			setStreamingMessage(assistantMessage);
+
+			// Update parent-child relationship
+			updateMessage(userMessageId, {
+				childrenIds: [assistantMessageId]
+			});
+
+			// Create or update chat
+			let currentChatId = chatId;
+			if (!currentChatId) {
+				// Create new chat
+				const newChatHistory: ChatHistory = {
+					messages: {
+						[userMessageId]: userMessage,
+						[assistantMessageId]: assistantMessage
+					},
+					currentId: assistantMessageId
+				};
+
+				const newChat = await openAIClient.createNewChat(token, {
+					id: uuidv4(),
+					title: prompt.slice(0, 50),
+					models: [selectedModel],
+					history: newChatHistory,
+					messages: [userMessage, assistantMessage],
+					timestamp: Date.now()
+				});
+
+				currentChatId = newChat.id;
+				addChat({
+					id: newChat.id,
+					title: prompt.slice(0, 50),
+					content: prompt,
+					created_at: Date.now(),
+					updated_at: new Date().toISOString()
+				});
+			}
+
+			// Send chat completion request
+			const response = await fetch(`${TEMP_API_BASE_URL}/api/chat/completions`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`
+				},
+				body: JSON.stringify({
+					model: selectedModel,
+					messages: [
+						{
+							role: 'user',
+							content: prompt
+						}
+					],
+					stream: true,
+					session_id: socket?.id,
+					chat_id: currentChatId,
+					message_id: assistantMessageId
+				})
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				throw new Error(error.detail || 'Failed to send message');
+			}
+
+			return {
+				chatId: currentChatId,
+				userMessageId,
+				assistantMessageId
+			};
+		},
+		onSuccess: (data) => {
+			queryClient.invalidateQueries({ queryKey: ['chat', data.chatId] });
+			queryClient.invalidateQueries({ queryKey: ['chats'] });
+		},
+		onError: (error) => {
+			console.error('Failed to send message:', error);
+			setStreamingMessage(null);
+		}
+	});
+
 	if (isChatLoading) {
 		return (
 			<div className="flex items-center justify-center h-full">
@@ -90,14 +258,14 @@ const Home: React.FC = () => {
 			/>
 		);
 	}
-	console.log('chat', chat);
+
 	return (
 		<div className="flex flex-col h-full bg-gray-900">
 			{/* Messages */}
 			<Navbar />
 			<div className="flex-1 overflow-y-auto px-4 py-4 pt-8 space-y-4">
 				{/* Messages */}
-				{chat?.chat.messages.map((message, idx) => {
+				{messages.map((message, idx) => {
 					// Create a mock history object for the message components
 					const mockHistory: ChatHistory = {
 						messages: { [message.id]: message },
@@ -120,6 +288,8 @@ const Home: React.FC = () => {
 								deleteMessage={handleDeleteMessage}
 							/>
 						);
+					} else if (message.role === 'assistant') {
+						return <MessageSkeleton />;
 					} else {
 						// For assistant messages, check if it's a multi-response scenario
 						const hasMultipleResponses = message.childrenIds && message.childrenIds.length > 1;
@@ -157,44 +327,13 @@ const Home: React.FC = () => {
 						}
 					}
 				})}
-
-				{/* Loading indicator */}
-				{isLoading && (
-					<div className="flex space-x-3">
-						<div className="flex-shrink-0">
-							<div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-sm font-medium text-white">
-								<NearAIIcon className="w-5 h-5" />
-							</div>
-						</div>
-						<div className="flex-1 min-w-0">
-							<div className="flex items-center space-x-2 mb-1">
-								<span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-									Assistant
-								</span>
-							</div>
-							<div className="text-sm text-gray-700 dark:text-gray-300">
-								<div className="flex items-center space-x-1">
-									<div className="flex space-x-1">
-										<div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-										<div
-											className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-											style={{ animationDelay: '0.1s' }}
-										></div>
-										<div
-											className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-											style={{ animationDelay: '0.2s' }}
-										></div>
-									</div>
-									<span className="text-xs text-gray-500">Thinking...</span>
-								</div>
-							</div>
-						</div>
-					</div>
-				)}
 			</div>
 
-			{/* Message Input */}
-			<MessageInput messages={messages} createMessagePair={handleSendMessage} />
+			<MessageInput
+				messages={messages}
+				onSubmit={handleSendMessage}
+				createMessagePair={handleSendMessage}
+			/>
 		</div>
 	);
 };

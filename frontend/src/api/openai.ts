@@ -1,12 +1,4 @@
-import type {
-	ChatCompletionRequest,
-	ChatCompletionResponse,
-	ChatCompletionStreamResponse,
-	Chat,
-	Model,
-	SessionUser,
-	ChatInfo
-} from '../types';
+import type { Chat, Model, SessionUser, ChatInfo } from '../types';
 
 const API_BASE_URL = 'https://private-chat.near.ai/api';
 
@@ -51,62 +43,7 @@ export class OpenAIClient {
 		return data;
 	}
 
-	async createChatCompletion(request: ChatCompletionRequest): Promise<ChatCompletionResponse> {
-		// For now, return mock data
-		await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-
-		return {
-			id: `chatcmpl-${Date.now()}`,
-			object: 'chat.completion',
-			created: Math.floor(Date.now() / 1000),
-			model: request.model,
-			choices: [
-				{
-					index: 0,
-					message: {
-						role: 'assistant',
-						content: `This is a mock response to: "${request.messages[request.messages.length - 1].content}". In a real implementation, this would come from the OpenAI API.`
-					},
-					finish_reason: 'stop'
-				}
-			],
-			usage: {
-				prompt_tokens: 50,
-				completion_tokens: 30,
-				total_tokens: 80
-			}
-		};
-	}
-
-	async *createChatCompletionStream(
-		request: ChatCompletionRequest
-	): AsyncIterable<ChatCompletionStreamResponse> {
-		const responseText = `This is a mock streaming response to: "${request.messages[request.messages.length - 1].content}". Each word will appear one by one to simulate streaming.`;
-		const words = responseText.split(' ');
-
-		for (let i = 0; i < words.length; i++) {
-			await new Promise((resolve) => setTimeout(resolve, 100)); // Simulate streaming delay
-
-			yield {
-				id: `chatcmpl-${Date.now()}`,
-				object: 'chat.completion.chunk',
-				created: Math.floor(Date.now() / 1000),
-				model: request.model,
-				choices: [
-					{
-						index: 0,
-						delta: {
-							role: i === 0 ? 'assistant' : undefined,
-							content: (i === 0 ? '' : ' ') + words[i]
-						},
-						finish_reason: i === words.length - 1 ? 'stop' : undefined
-					}
-				]
-			};
-		}
-	}
-
-	// Chat management functions (these would normally be separate from OpenAI client)
+	// Chat management functions
 	async getChats(): Promise<ChatInfo[]> {
 		const token = localStorage.getItem('token');
 		if (!token) {
@@ -137,6 +74,68 @@ export class OpenAIClient {
 		const data = await response.json();
 		console.log('response', response, data);
 		return data;
+	}
+
+	async getArchivedChatList(token: string = '') {
+		let error = null;
+
+		const res = await fetch(`${this.baseURL}/chats/archived`, {
+			method: 'GET',
+			headers: {
+				Accept: 'application/json',
+				'Content-Type': 'application/json',
+				...(token && { authorization: `Bearer ${token}` })
+			}
+		})
+			.then(async (res) => {
+				if (!res.ok) throw await res.json();
+				return res.json();
+			})
+			.then((json) => {
+				return json;
+			})
+			.catch((err) => {
+				error = err;
+				console.log(err);
+				return null;
+			});
+
+		if (error) {
+			throw error;
+		}
+
+		return res;
+	}
+
+	async createNewChat(token: string, chat: object) {
+		let error = null;
+
+		const res = await fetch(`${this.baseURL}/v1/chats/new`, {
+			method: 'POST',
+			headers: {
+				Accept: 'application/json',
+				'Content-Type': 'application/json',
+				authorization: `Bearer ${token}`
+			},
+			body: JSON.stringify({
+				chat: chat
+			})
+		})
+			.then(async (res) => {
+				if (!res.ok) throw await res.json();
+				return res.json();
+			})
+			.catch((err) => {
+				error = err;
+				console.log(err);
+				return null;
+			});
+
+		if (error) {
+			throw error;
+		}
+
+		return res;
 	}
 
 	async createChat(title: string = 'New Chat') {
