@@ -171,7 +171,7 @@ const LeftSidebar: React.FC = () => {
 									</div>
 								</div>
 							</div>
-							<div className="flex flex-col  w-full justify-between rounded-lg  py-[6px]  group-hover:bg-gray-100 dark:group-hover:bg-gray-950 whitespace-nowrap text-ellipsis">
+							<div className="flex flex-col flex-1 w-full  rounded-lg  py-[6px]  group-hover:bg-gray-100 dark:group-hover:bg-gray-950 whitespace-nowrap text-ellipsis">
 								{isChatsOpen &&
 									chatsGroupedByFolder.map(([timeRange, chats], index) => (
 										<div>
@@ -183,47 +183,46 @@ const LeftSidebar: React.FC = () => {
 											>
 												{timeRange}
 											</div>
-											{currentChat &&
-												chats.map((chat) => (
-													<div className="w-full  relative group" key={chat.id} draggable="true">
-														<a
-															className={
-																`w-full flex justify-between rounded-lg px-[11px] py-[6px] whitespace-nowrap text-ellipsis` +
-																(chat.id === currentChat.id ? ' bg-[#00ec9714]' : '')
-															}
-															href={`/c/${chat.id}`}
-															draggable="false"
-														>
-															<div className="flex self-center flex-1 w-full">
-																<div
-																	dir="auto"
-																	className="text-left self-center text-white overflow-hidden w-full h-[20px]"
-																>
-																	{chat.title}
-																</div>
+											{chats.map((chat) => (
+												<div className="w-full  relative group" key={chat.id} draggable="true">
+													<a
+														className={
+															`w-full flex justify-between rounded-lg px-[11px] py-[6px] whitespace-nowrap text-ellipsis` +
+															(chat.id === currentChat?.id ? ' bg-[#00ec9714]' : '')
+														}
+														href={`/c/${chat.id}`}
+														draggable="false"
+													>
+														<div className="flex self-center flex-1 w-full">
+															<div
+																dir="auto"
+																className="text-left self-center text-white overflow-hidden w-full h-[20px]"
+															>
+																{chat.title}
 															</div>
-															<DropdownMenu>
-																<DropdownMenuTrigger>
-																	<EllipsisHorizontal
-																		className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"
-																		fill="white"
-																		stroke="white"
-																	/>
-																</DropdownMenuTrigger>
-																<DropdownMenuContent
-																	className="w-full bg-gray-875 min-w-[240px] outline-none ring-none border-none"
-																	loop
-																>
-																	{chatDropdownItems.map((item) => (
-																		<DropdownMenuItem className="flex flex-row gap-2 py-2 px-3 hover:bg-gray-800 focus:bg-gray-800 focus:text-white hover:text-white text-white">
-																			{item.icon} {item.title}
-																		</DropdownMenuItem>
-																	))}
-																</DropdownMenuContent>
-															</DropdownMenu>
-														</a>
-													</div>
-												))}
+														</div>
+														<DropdownMenu>
+															<DropdownMenuTrigger>
+																<EllipsisHorizontal
+																	className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"
+																	fill="white"
+																	stroke="white"
+																/>
+															</DropdownMenuTrigger>
+															<DropdownMenuContent
+																className="w-full bg-gray-875 min-w-[240px] outline-none ring-none border-none"
+																loop
+															>
+																{chatDropdownItems.map((item) => (
+																	<DropdownMenuItem className="flex flex-row gap-2 py-2 px-3 hover:bg-gray-800 focus:bg-gray-800 focus:text-white hover:text-white text-white">
+																		{item.icon} {item.title}
+																	</DropdownMenuItem>
+																))}
+															</DropdownMenuContent>
+														</DropdownMenu>
+													</a>
+												</div>
+											))}
 										</div>
 									))}
 							</div>
