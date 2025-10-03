@@ -10,9 +10,11 @@ import NvidiaLogo from '@/assets/images/nvidia-2.svg';
 import SafeLogo from '@/assets/images/safe.svg';
 import { cn } from '@/lib/utils';
 import type { VerificationStatus } from './types';
+import { useTranslation } from 'react-i18next';
 import { useViewStore } from '@/stores/useViewStore';
 
 const ChatVerifier: React.FC = () => {
+	const { t } = useTranslation('translation', { useSuspense: false });
 	//TODO: Use the chatId from the useLocation hook
 
 	const { currentChat, selectedModels } = useChatStore();
@@ -65,7 +67,7 @@ const ChatVerifier: React.FC = () => {
 				<div className="flex w-[320px] items-center justify-between px-4 pb-4 pt-3.5">
 					<h2 className="text-base text-gray-900 dark:text-white gap-2 flex items-center">
 						<img alt="safe" src={SafeLogo} className="w-6 h-6" />
-						AI Chat Verification
+						{t('AI Chat Verification')}
 					</h2>
 					<button
 						onClick={toggleVerifier}
@@ -81,7 +83,7 @@ const ChatVerifier: React.FC = () => {
 					<div className="flex-shrink-0 dark:border-gray-700">
 						<div className="p-4">
 							<h2 className="text-base font-semibold text-gray-900 flex rounded items-center dark:text-gray-300 h-8 mb-3">
-								Model Verification
+								{t('Model Verification')}
 							</h2>
 
 							{/* Hidden ModelVerifier for automatic verification */}
@@ -98,7 +100,7 @@ const ChatVerifier: React.FC = () => {
 								<div className="flex items-center justify-center py-4">
 									<div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-300"></div>
 									<span className="ml-3 text-sm text-gray-600 dark:text-gray-400">
-										Verifying confidentiality...
+										{t('Verifying confidentiality...')}
 									</span>
 								</div>
 							) : modelVerificationStatus?.error ? (
@@ -117,7 +119,7 @@ const ChatVerifier: React.FC = () => {
 										disabled={!selectedModels[0]}
 										className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white text-sm font-medium rounded-md transition-colors"
 									>
-										Retry Verification
+										{t('Retry Verification')}
 									</button>
 								</>
 							) : modelVerificationStatus?.isVerified ? (
@@ -127,21 +129,21 @@ const ChatVerifier: React.FC = () => {
 										<div className="flex items-center mb-2">
 											<CheckCircleIcon className="w-5 h-5 text-green-500 mr-2" />
 											<span className="text-green-700 dark:text-emerald-300 text-sm font-medium">
-												Your chat is confidential.
+												{t('Your chat is confidential.')}
 											</span>
 										</div>
 
 										{/* Attestation Sponsors */}
 										<div className="mb-2">
 											<p className="text-xs text-gray-600 dark:text-[rgba(248,248,248,0.64)] mb-2">
-												Attested by
+												{t('Attested by')}
 											</p>
 											<div className="flex items-center space-x-4">
 												{/* NVIDIA Logo */}
 												<div className="flex space-x-2">
 													<img src={NvidiaLogo} alt="NVIDIA" className="w-16 h-6" />
 												</div>
-												<span className="text-[rgba(248,248,248,0.64)] text-xs">and</span>
+													<span className="text-[rgba(248,248,248,0.64)] text-xs">{t('and')}</span>
 												{/* Intel Logo */}
 												<div className="flex space-x-2">
 													<img src={IntelLogo} alt="Intel" className="w-12 h-6" />
@@ -150,12 +152,8 @@ const ChatVerifier: React.FC = () => {
 										</div>
 
 										{/* Description */}
-										<p
-											style={{ lineHeight: '1.5em' }}
-											className="text-xs text-gray-600 dark:text-gray-400"
-										>
-											This automated verification tool lets you independently confirm that the model
-											is running in the TEE (Trusted Execution Environment).
+										<p style={{ lineHeight: '1.5em' }} className="text-xs text-gray-600 dark:text-gray-400">
+											{t('This automated verification tool lets you independently confirm that the model is running in the TEE (Trusted Execution Environment).')}
 										</p>
 									</div>
 
@@ -164,7 +162,7 @@ const ChatVerifier: React.FC = () => {
 										onClick={openModelVerifier}
 										className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-[rgba(248,248,248,0.08)] text-gray-700 dark:text-white text-sm rounded-md transition-colors"
 									>
-										View Verification Details
+										{t('View Verification Details')}
 									</button>
 								</>
 							) : (
@@ -172,7 +170,7 @@ const ChatVerifier: React.FC = () => {
 								<div className="flex items-center justify-center py-4">
 									<div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
 									<span className="ml-3 text-sm text-gray-600 dark:text-gray-400">
-										Verifying confidentiality...
+										{t('Verifying confidentiality...')}
 									</span>
 								</div>
 							)}
@@ -185,7 +183,7 @@ const ChatVerifier: React.FC = () => {
 							<div className="h-full flex flex-col">
 								<div className="flex-shrink-0">
 									<h2 className="text-base font-semibold text-gray-900 flex rounded items-center pl-4 dark:text-gray-300 h-8">
-										Messages Verification
+										{t("Messages Verification")}
 									</h2>
 								</div>
 								<div className="flex-1 overflow-y-auto">

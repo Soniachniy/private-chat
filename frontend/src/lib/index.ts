@@ -40,3 +40,13 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
 
 	return result;
 };
+
+
+export const validateJSON = (json: string): boolean => {
+	try {
+		const obj = JSON.parse(json);
+		return obj && typeof obj === 'object';
+	} catch {
+		return false;
+	}
+};

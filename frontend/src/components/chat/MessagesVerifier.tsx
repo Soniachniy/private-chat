@@ -10,6 +10,7 @@ import { useMessagesSignaturesStore } from '@/stores/useMessagesSignaturesStore'
 import VerifySignatureDialog from './VerifySignatureDialog';
 import type { Message } from '@/types';
 import VerifiedLogo from '@/assets/images/verified.svg';
+import { useTranslation } from 'react-i18next';
 
 interface MessagesVerifierProps {
 	history: {
@@ -20,6 +21,7 @@ interface MessagesVerifierProps {
 }
 
 const MessagesVerifier: React.FC<MessagesVerifierProps> = ({ history, chatId }) => {
+	const { t } = useTranslation('translation', { useSuspense: false });
 	const { messagesSignatures, setMessageSignature } = useMessagesSignaturesStore();
 
 	const [loadingSignatures, setLoadingSignatures] = useState<Set<string>>(new Set());
@@ -185,7 +187,7 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({ history, chatId }) 
 				/* Verifiable Messages Section */
 				<div className="space-y-4">
 					<p className="text-xs mt-4 text-gray-900 uppercase dark:text-[rgba(161,161,161,1)]">
-						Verifiable Messages ({chatCompletions.length})
+						{t('Verifiable Messages')} ({chatCompletions.length})
 					</p>
 
 					{messageList.map((message, index) => (
@@ -205,7 +207,7 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({ history, chatId }) 
 							{/* Message Content */}
 							<div className="mb-3">
 								<h4 className="text-sm font-medium text-gray-900 flex items-center justify-between dark:text-white mb-3">
-									<span>Message {index + 1}</span>
+									<span>{t('Message')} {index + 1}</span>
 									<div className="flex items-center space-x-1">
 										<img src={VerifiedLogo} alt="Verified" />
 									</div>
@@ -218,7 +220,7 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({ history, chatId }) 
 									{message.content}
 								</p>
 								<p className="text-xs text-gray-500 dark:text-[rgba(248,248,248,0.64)]">
-									ID: {message.chatCompletionId}
+									{t('ID')}: {message.chatCompletionId}
 								</p>
 							</div>
 						</div>
@@ -229,7 +231,7 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({ history, chatId }) 
 							className="w-full flex items-center justify-center px-4 py-2 bg-gray-100 gap-2.5 hover:bg-gray-200 dark:bg-[rgba(248,248,248,0.08)] text-gray-700 dark:text-white text-sm rounded-md transition-colors"
 							onClick={() => setViewMore(!viewMore)}
 						>
-							{viewMore ? 'View Less' : 'View More'}
+							{viewMore ? t('View Less') : t('View More')}
 							<ChevronDownIcon
 								className={`w-4 h-4 ${viewMore ? 'rotate-180' : ''}`}
 								strokeWidth={2.5}
@@ -241,7 +243,7 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({ history, chatId }) 
 					<div className="space-y-3">
 						<div className="flex justify-between items-center">
 							<p className="text-xs text-gray-900 uppercase dark:text-[rgba(161,161,161,1)] mt-4">
-								Signature Details
+								{t('Signature Details')}
 							</p>
 						</div>
 
@@ -254,7 +256,7 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({ history, chatId }) 
 										onClick={openVerifySignatureDialog}
 									>
 										<ArrowTopRightOnSquareIcon className="w-3 h-3 mr-1" />
-										Verify the ECDSA Signature
+										{t('Verify the ECDSA Signature')}
 									</button>
 								)}
 
@@ -262,7 +264,7 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({ history, chatId }) 
 									{/* Signing Address */}
 									<div className="mb-2">
 										<label className="block text-xs text-gray-700 dark:text-[rgba(161,161,161,1)] mb-1">
-											Signing Address:
+											{t('Signing Address')}:
 										</label>
 										<div className="px-2 py-1 bg-gray-100 dark:bg-[rgba(248,248,248,0.04)] border border-gray-300 dark:border-[rgba(248,248,248,0.08)] rounded text-xs font-mono break-all min-h-[24px] flex items-center">
 											{messagesSignatures[selectedMessageId].signing_address ?? ''}
@@ -272,7 +274,7 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({ history, chatId }) 
 									{/* Message Hash */}
 									<div className="mb-2">
 										<label className="block text-xs text-gray-700 dark:text-[rgba(161,161,161,1)] mb-1">
-											Message:
+											{t('Message')}:
 										</label>
 										<div className="px-2 py-1 bg-gray-100 dark:bg-[rgba(248,248,248,0.04)] border border-gray-300 dark:border-[rgba(248,248,248,0.08)] rounded text-xs font-mono break-all min-h-[24px] flex items-center">
 											{messagesSignatures[selectedMessageId].text ?? ''}
@@ -282,7 +284,7 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({ history, chatId }) 
 									{/* Signature */}
 									<div className="mb-2">
 										<label className="block text-xs text-gray-700 dark:text-[rgba(161,161,161,1)] mb-1">
-											Signature:
+											{t('Signature')}:
 										</label>
 										<div className="px-2 py-1 bg-gray-100 dark:bg-[rgba(248,248,248,0.04)] border border-gray-300 dark:border-[rgba(248,248,248,0.08)] rounded text-xs font-mono break-all min-h-[24px] flex items-center">
 											{messagesSignatures[selectedMessageId].signature ?? ''}
@@ -292,7 +294,7 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({ history, chatId }) 
 									{/* Algorithm */}
 									<div>
 										<label className="block text-xs text-gray-700 dark:text-[rgba(161,161,161,1)] mb-1">
-											Algorithm:
+											{t('Algorithm')}:
 										</label>
 										<div className="px-2 py-1 bg-gray-100 dark:bg-[rgba(248,248,248,0.04)] border border-gray-300 dark:border-[rgba(248,248,248,0.08)] rounded text-xs min-h-[24px] flex items-center">
 											{messagesSignatures[selectedMessageId].signing_algo ?? ''}
@@ -307,18 +309,18 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({ history, chatId }) 
 									<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[rgba(0,236,151,1)]"></div>
 								</div>
 							) : errorSignatures[selectedMessageId] ? (
-								/* Error State */
+							/* Error State */
 								<div className="rounded-lg min-h-[150px] flex items-center justify-center">
 									<div className="text-center py-2 text-gray-500 dark:text-gray-400">
-										<p className="text-xs">No signature data found for this message.</p>
+										<p className="text-xs">{t('No signature data found for this message.')}</p>
 									</div>
-									{/* retry */}
+								{/* retry */}
 									<button
-										title="Retry"
+										title={t('Retry')}
 										type="button"
 										className="hover:opacity-75 ml-1 cursor-pointer"
 										onClick={() => fetchMessageSignature(selectedMessageId)}
-									>
+										>
 										<ArrowPathIcon className="w-3.5 h-3.5 text-[rgba(0,236,151,1)]" />
 									</button>
 								</div>
@@ -326,14 +328,14 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({ history, chatId }) 
 								/* No Signature Found State */
 								<div className="rounded-lg min-h-[150px] flex items-center justify-center">
 									<div className="text-center py-2 text-gray-500 dark:text-gray-400">
-										<p className="text-xs">No signature data found for this message.</p>
+										<p className="text-xs">{t('No signature data found for this message.')}</p>
 									</div>
 								</div>
-							)
+								)
 						) : (
 							<div className="rounded-lg min-h-[150px] flex items-center justify-center">
 								<div className="text-center py-2 text-gray-500 dark:text-gray-400">
-									<p className="text-xs">Click on a message above to view signature details</p>
+									<p className="text-xs">{t('Click on a message above to view signature details')}</p>
 								</div>
 							</div>
 						)}
@@ -342,7 +344,7 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({ history, chatId }) 
 			) : (
 				/* No Data State */
 				<div className="text-center py-8 text-gray-500 dark:text-gray-400">
-					<p className="text-sm">No verifiable messages found for this chat.</p>
+					<p className="text-sm">{t('No verifiable messages found for this chat.')}</p>
 				</div>
 			)}
 
