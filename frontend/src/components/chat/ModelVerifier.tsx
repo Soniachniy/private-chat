@@ -11,7 +11,7 @@ import {
 	ArrowTopRightOnSquareIcon
 } from '@heroicons/react/24/outline';
 import { copyToClipboard } from '@/lib/index';
-import { getModelAttestationReport, type ModelAttestationReport } from '@/api/nearai';
+import { nearAIClient, type ModelAttestationReport } from '@/api/nearai';
 import IntelLogo from '@/assets/images/intel-2.svg';
 import NvidiaLogo from '@/assets/images/nvidia-2.svg';
 import type { VerificationStatus } from './types';
@@ -63,10 +63,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 		setError(null);
 
 		try {
-			const data = await getModelAttestationReport({
-				token,
-				model
-			});
+			const data = await nearAIClient.getModelAttestationReport(token, model);
 			setAttestationData(data);
 			setNvidiaPayload(JSON.parse(data?.nvidia_payload || '{}'));
 			setIntelQuote(data?.intel_quote || null);

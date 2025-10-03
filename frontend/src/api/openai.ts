@@ -4,13 +4,12 @@ import type {
 	ChatCompletionStreamResponse,
 	Chat,
 	Model,
-	SessionUser,
 	ChatInfo
 } from '../types';
 
 const API_BASE_URL = 'https://private-chat.near.ai/api';
 
-export class OpenAIClient {
+class OpenAIClient {
 	private apiKey: string;
 	private baseURL: string;
 
@@ -32,22 +31,6 @@ export class OpenAIClient {
 			}
 		});
 		const { data } = await response.json();
-		return data;
-	}
-
-	async authUser(): Promise<SessionUser> {
-		const token = localStorage.getItem('token');
-		if (!token) {
-			throw new Error('No token found');
-		}
-
-		const response = await fetch(`${this.baseURL}/v1/auths/`, {
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${token}`
-			}
-		});
-		const data = await response.json();
 		return data;
 	}
 
