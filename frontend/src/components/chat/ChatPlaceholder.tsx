@@ -70,7 +70,6 @@ const ChatPlaceholder: React.FC<ChatPlaceholderProps> = ({ submitPrompt, submitV
 			<div className="m-auto w-full max-w-6xl px-2 2xl:px-20 translate-y-6 py-24 text-center">
 				<div className="w-full text-3xl text-gray-800 dark:text-gray-100 text-center flex items-center gap-4 font-primary">
 					<div className="w-full flex flex-col justify-center items-center">
-						{/* Title */}
 						<div className="flex flex-col justify-center gap-3 items-center sm:gap-3.5 w-fit px-2 pb-3 max-w-2xl">
 							<h1 className="text-3xl text-white sm:text-3xl flex gap-2 items-center">
 								<NearAIIcon className="h-6" /> AI
@@ -81,7 +80,6 @@ const ChatPlaceholder: React.FC<ChatPlaceholderProps> = ({ submitPrompt, submitV
 							</p>
 						</div>
 
-						{/* Input */}
 						<div className="text-base font-normal md:max-w-3xl w-full py-3">
 							<div className="w-full font-primary dark:bg-gray-900 px-2.5 mx-auto inset-x-0">
 								<div className="flex-1 flex flex-col app-chat-input relative w-full shadow-lg rounded-3xl border border-gray-50 dark:border-gray-850 hover:border-gray-100 focus-within:border-gray-100 hover:dark:border-gray-800 focus-within:dark:border-gray-800 transition px-1 bg-white/90 dark:bg-gray-400/5 dark:text-gray-100">
@@ -97,9 +95,7 @@ const ChatPlaceholder: React.FC<ChatPlaceholderProps> = ({ submitPrompt, submitV
 											/>
 										</div>
 										<div className="flex justify-between mt-0.5 mb-2.5 mx-0.5 max-w-full" dir="ltr">
-											<div className="ml-1 self-end flex items-center flex-1 max-w-[80%]">
-												{/* Input menu placeholder */}
-											</div>
+											<div className="ml-1 self-end flex items-center flex-1 max-w-[80%]"></div>
 
 											<div className="self-end flex space-x-1 mr-1 shrink-0">
 												{inputValue === '' ? (

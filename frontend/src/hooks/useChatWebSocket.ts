@@ -26,7 +26,7 @@ interface ChatEventData {
 		done?: boolean;
 		error?: unknown;
 		files?: unknown[];
-		data?: unknown; // For nested data in chat:completion events
+		data?: unknown;
 	};
 }
 
@@ -60,9 +60,8 @@ export const useChatWebSocket = () => {
 	const [connectionStatus, setConnectionStatus] = useState<
 		'connecting' | 'connected' | 'disconnected' | 'error'
 	>('disconnected');
-	const { updateMessage, appendToMessage, history } = useChatStore();
+	const { updateMessage, appendToMessage, currentChat } = useChatStore();
 
-	// Helper function to handle chat completion events similar to Svelte's chatCompletionEventHandler
 	const handleChatCompletion = useCallback(
 		(data: CompletionData, messageId: string) => {
 			const { id, done, choices, content, sources, selected_model_id, error, usage } = data;
@@ -76,40 +75,34 @@ export const useChatWebSocket = () => {
 				return;
 			}
 
-			// Store the chat completion ID if provided
 			if (id) {
 				updateMessage(messageId, {
 					chatCompletionId: id
 				});
 			}
 
-			// Handle sources if present
 			if (sources) {
 				updateMessage(messageId, {
 					sources: sources
 				});
 			}
 
-			// Handle usage statistics if present
 			if (usage) {
 				updateMessage(messageId, {
 					usage: usage
 				});
 			}
 
-			// Handle choices for streaming and non-streaming responses
 			if (choices && choices.length > 0) {
+				console.log('Choices:', choices);
 				const choice = choices[0];
 
 				if (choice.message?.content) {
-					// Non-streaming response: append content
 					appendToMessage(messageId, choice.message.content);
 				} else if (choice.delta?.content) {
-					// Streaming response: append delta content
 					const deltaContent = choice.delta.content;
 
-					// Similar to Svelte: skip empty responses that are just newlines
-					const currentMessage = history.messages[messageId];
+					const currentMessage = currentChat?.chat.history.messages[messageId];
 					if (currentMessage && currentMessage.content === '' && deltaContent === '\n') {
 						console.log('Empty response');
 					} else {
@@ -118,12 +111,11 @@ export const useChatWebSocket = () => {
 				}
 			}
 
-			// Handle direct content (for cases where it's not in choices)
 			if (content) {
+				console.log('Content appended:', content);
 				appendToMessage(messageId, content);
 			}
 
-			// Handle completion
 			if (done) {
 				updateMessage(messageId, {
 					done: true,
@@ -131,7 +123,7 @@ export const useChatWebSocket = () => {
 				});
 			}
 		},
-		[updateMessage, appendToMessage, history.messages]
+		[updateMessage, appendToMessage, currentChat?.chat.history.messages]
 	);
 
 	const handleChatEvent = useCallback(
@@ -140,7 +132,6 @@ export const useChatWebSocket = () => {
 
 			console.log('WebSocket chat event:', data);
 
-			// Only process events for current chat (similar to Svelte logic)
 			const type = eventData.type;
 
 			switch (type) {
@@ -161,6 +152,7 @@ export const useChatWebSocket = () => {
 				case 'chat:message:delta':
 				case 'message':
 					if (eventData.content) {
+						console.log('Chat message delta:', eventData.content);
 						appendToMessage(message_id, eventData.content);
 					}
 					break;
@@ -184,7 +176,6 @@ export const useChatWebSocket = () => {
 					break;
 
 				case 'chat:title':
-					// Handle chat title updates (could update store)
 					console.log('Chat title updated:', eventData);
 					break;
 
@@ -240,7 +231,6 @@ export const useChatWebSocket = () => {
 		socket.on('disconnect', (reason) => {
 			console.log('WebSocket disconnected:', reason);
 			setConnectionStatus('disconnected');
-			// Clear streaming message on disconnect to prevent UI issues
 		});
 
 		socket.on('connect_error', (error) => {
@@ -275,7 +265,7 @@ export const useChatWebSocket = () => {
 		});
 
 		socketRef.current = socket;
-		console.log('CONNNNNNECTEDD socket', socket);
+
 		return () => {
 			if (socket.connected) {
 				socket.disconnect();

@@ -12,7 +12,7 @@ import Collapsible from '../../common/Collapsible';
 interface MarkdownTokensProps {
 	tokens: Token[];
 	id: string;
-	top?: boolean; // Controls whether text tokens render as <p> tags
+	top?: boolean;
 }
 
 const MarkdownInlineTokens: React.FC<{ tokens?: Token[]; id: string }> = ({ tokens, id }) => {
@@ -224,8 +224,6 @@ const MarkdownTokens: React.FC<MarkdownTokensProps> = ({ tokens, id, top = false
 				}
 
 				if (token.type === 'text') {
-					// If 'top' is true (loose list), wrap text in <p> tags
-					// Otherwise, render inline tokens directly or as plain text
 					if (top) {
 						return (
 							<p key={key}>
@@ -257,7 +255,6 @@ const MarkdownTokens: React.FC<MarkdownTokensProps> = ({ tokens, id, top = false
 					);
 				}
 				if (token.type === 'details') {
-					// Parse the text content using marked lexer for recursive markdown parsing
 					const contentTokens = lexer(token.text || '');
 
 					return (
@@ -269,7 +266,6 @@ const MarkdownTokens: React.FC<MarkdownTokensProps> = ({ tokens, id, top = false
 					);
 				}
 
-				// Unknown token type
 				console.log('Unknown token', token);
 				return null;
 			})}

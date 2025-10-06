@@ -26,7 +26,6 @@ const VerifySignatureDialog: React.FC<VerifySignatureDialogProps> = ({
 	const [verifyStatus, setVerifyStatus] = useState<VerifyStatus>('pending');
 	const [checkedMap, setCheckedMap] = useState<Record<string, boolean>>({});
 
-	// Verify signature when component shows and has required data
 	useEffect(() => {
 		if (show && address && message && signature) {
 			setVerifyStatus('pending');
@@ -35,7 +34,6 @@ const VerifySignatureDialog: React.FC<VerifySignatureDialogProps> = ({
 		}
 	}, [show, address, message, signature]);
 
-	// Reset checked map when dialog shows
 	useEffect(() => {
 		if (show) {
 			setCheckedMap({});
@@ -185,7 +183,7 @@ const VerifySignatureDialog: React.FC<VerifySignatureDialogProps> = ({
 									) : (
 										<ClipboardIcon className="w-4 h-4" />
 									)}
-							{t('Copy')}
+									{t('Copy')}
 								</button>
 							</div>
 							<div className="flex-1">

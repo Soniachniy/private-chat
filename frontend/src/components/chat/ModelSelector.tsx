@@ -95,7 +95,6 @@ function ModelSelectorItem({
 				</div>
 			</div>
 
-			{/* Add/Remove Button */}
 			{showRemove && (
 				<div className="self-center mx-1 disabled:text-gray-600 disabled:hover:text-gray-600 -translate-y-[0.5px]">
 					<button
@@ -147,7 +146,6 @@ export default function ModelSelector() {
 		}
 	};
 
-	// Get available models for each selector (excluding already selected ones)
 	const getAvailableModelsForIndex = (currentIndex: number) => {
 		const otherSelectedModels = selectedModels.filter((_, idx) => idx !== currentIndex);
 

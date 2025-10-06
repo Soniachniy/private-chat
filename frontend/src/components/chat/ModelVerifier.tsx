@@ -53,7 +53,6 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 	});
 	const [checkedMap, setCheckedMap] = useState<CheckedMap>({});
 
-	// Function to fetch attestation report
 	const fetchAttestationReport = useCallback(async () => {
 		const token = localStorage.getItem('token');
 
@@ -75,19 +74,16 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 		}
 	}, [model]);
 
-	// Function to verify again
 	const verifyAgain = async () => {
 		await fetchAttestationReport();
 		setCheckedMap({});
 	};
 
-	// Function to close modal
 	const handleClose = () => {
 		onClose();
 		setCheckedMap({});
 	};
 
-	// Toggle section expansion
 	const toggleSection = (section: 'gpu' | 'tdx') => {
 		setExpandedSections((prev) => ({
 			...prev,
@@ -95,7 +91,6 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 		}));
 	};
 
-	// Handle copy to clipboard
 	const handleCopy = async (text: string, key: string) => {
 		const success = await copyToClipboard(text);
 		if (success) {
@@ -104,14 +99,12 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 		}
 	};
 
-	// Handle backdrop click
 	const handleBackdropClick = (e: React.MouseEvent) => {
 		if (e.target === e.currentTarget) {
 			handleClose();
 		}
 	};
 
-	// Verification status for parent components
 	const verificationStatus: VerificationStatus = useMemo(
 		() => ({
 			loading,
@@ -122,14 +115,12 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 		[loading, error, attestationData]
 	);
 
-	// Dispatch verification status updates
 	useEffect(() => {
 		if (autoVerify && onStatusUpdate) {
 			onStatusUpdate(verificationStatus);
 		}
 	}, [autoVerify, onStatusUpdate, verificationStatus]);
 
-	// Fetch data when component mounts or model changes
 	useEffect(() => {
 		const token = localStorage.getItem('token');
 
@@ -138,7 +129,6 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 		}
 	}, [show, autoVerify, model, fetchAttestationReport]);
 
-	// Reset data when modal closes
 	useEffect(() => {
 		if (!show) {
 			setAttestationData(null);
@@ -147,7 +137,6 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 		}
 	}, [show]);
 
-	// Reset checked map when modal shows
 	useEffect(() => {
 		if (show) {
 			setCheckedMap({});
@@ -165,7 +154,6 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 				className="bg-white dark:bg-gray-875 rounded-lg shadow-3xl border-gray-200 dark:border-[rgba(255,255,255,0.04)] max-w-2xl w-full max-h-[90vh] overflow-y-auto"
 				onClick={(e) => e.stopPropagation()}
 			>
-				{/* Header */}
 				<div className="flex items-center justify-between px-6 py-4 dark:border-gray-700">
 					<p className="text-lg text-gray-900 dark:text-white gap-2 flex items-center">
 						{t('Model Verification')}
@@ -178,9 +166,7 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 					</button>
 				</div>
 
-				{/* Content */}
 				<div className="p-6">
-					{/* Model Info */}
 					<div className="mb-4">
 						<p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
 							{t('Verified Model')}
@@ -188,30 +174,26 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 						<p className="text-sm text-gray-600 dark:text-gray-400">{model}</p>
 					</div>
 
-					{/* Attestation Source */}
 					<div className="mb-6">
 						<p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{t('Attested by')}</p>
 						<div className="flex items-center space-x-4">
-							{/* NVIDIA Logo */}
 							<div className="flex items-center space-x-2">
 								<img src={NvidiaLogo} alt="NVIDIA" className="w-20 h-8" />
 							</div>
 							<p className="text-gray-600 dark:text-gray-400">{t('and')}</p>
-							{/* Intel Logo */}
+
 							<div className="flex items-center space-x-2">
 								<img src={IntelLogo} alt="Intel" className="w-16 h-8" />
 							</div>
 						</div>
 					</div>
 
-					{/* Description */}
 					<p className="text-gray-700 dark:text-gray-300 mb-6">
 						{t(
 							'This automated verification tool lets you independently confirm that the model is running in the TEE (Trusted Execution Environment).'
 						)}
 					</p>
 
-					{/* Loading State */}
 					{loading && (
 						<div className="flex items-center justify-center py-8">
 							<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[rgba(0,236,151,1)]"></div>
@@ -221,7 +203,6 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 						</div>
 					)}
 
-					{/* Error State */}
 					{error && (
 						<div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
 							<div className="flex items-center">
@@ -231,10 +212,8 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 						</div>
 					)}
 
-					{/* Attestation Results */}
 					{attestationData && (
 						<div className="space-y-4">
-							{/* GPU Attestation Section */}
 							<div className="bg-gray-50 dark:bg-[rgba(0,236,151,0.08)] rounded-lg p-4">
 								<button
 									onClick={() => toggleSection('gpu')}
@@ -258,7 +237,6 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 								{expandedSections.gpu && (
 									<div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
 										<div className="space-y-4">
-											{/* NVIDIA Remote Attestation Service Info */}
 											<div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
 												<div className="flex items-center mb-2">
 													<img src={NvidiaLogo} alt="NVIDIA" className="w-20 h-8 mr-2" />
@@ -293,7 +271,6 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 												</div>
 											</div>
 
-											{/* Nonce Section */}
 											{nvidiaPayload && (
 												<div>
 													<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -323,7 +300,6 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 												</div>
 											)}
 
-											{/* Evidence List Section */}
 											{nvidiaPayload && (
 												<div>
 													<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -356,7 +332,6 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 												</div>
 											)}
 
-											{/* Architecture Section */}
 											<div>
 												<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
 													{t('Architecture')}:
@@ -389,7 +364,6 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 								)}
 							</div>
 
-							{/* TDX Attestation Section */}
 							<div className="bg-gray-50 dark:bg-[rgba(0,236,151,0.08)] rounded-lg p-4">
 								<button
 									onClick={() => toggleSection('tdx')}
@@ -484,7 +458,6 @@ const ModelVerifier: React.FC<ModelVerifierProps> = ({
 						</div>
 					)}
 
-					{/* Verify Again Button */}
 					{attestationData && (
 						<div className="mt-6 flex justify-center">
 							<button

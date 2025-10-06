@@ -128,7 +128,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
 	placeholder = '',
 	onSubmit = () => {}
 }) => {
-	// Connect to stores
 	const { user } = useUserStore();
 	const { settings } = useSettingsStore();
 	const [loaded, setLoaded] = useState(false);
@@ -162,7 +161,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
 	}, [prompt, files, selectedToolIds, imageGenerationEnabled, webSearchEnabled, onChange]);
 	const uploadFileHandler = useCallback(
 		async (file: File, fullContext: boolean = false) => {
-			// Check user permissions for file upload
 			if (user?.role !== 'admin') {
 				toast.error('You do not have permission to upload files.');
 				return null;
@@ -231,7 +229,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
 	const inputFilesHandler = useCallback(
 		async (inputFiles: File[]) => {
 			inputFiles.forEach(async (file) => {
-				// Default max file size: 10MB
 				const maxFileSize = 10 * 1024 * 1024; // 10MB in bytes
 				if (file.size > maxFileSize) {
 					toast.error(`File size should not exceed 10 MB.`);
@@ -380,7 +377,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
 			}
 		}
 
-		// Check if mobile (we'll use a simple check for now)
 		const isMobile = window.innerWidth < 768;
 		if (!isMobile) {
 			if (isComposing) return;
@@ -742,16 +738,12 @@ const MessageInput: React.FC<MessageInputProps> = ({
 
 										<div className="flex justify-between mt-1 mb-2.5 mx-0.5 max-w-full" dir="ltr">
 											<div className="ml-1 self-end flex items-center flex-1 max-w-[80%] gap-0.5">
-												{/* Input Menu */}
 												<div className="relative">
 													<button
 														className="bg-transparent hover:bg-gray-100 text-gray-800 dark:text-white dark:hover:bg-gray-800 transition rounded-full p-1.5 outline-hidden focus:outline-hidden"
 														type="button"
 														aria-label="More"
 														onClick={() => {
-															// You can implement a menu here with options like:
-															// - Upload files: filesInputRef.current?.click()
-															// - Screen capture: screenCaptureHandler()
 															filesInputRef.current?.click();
 														}}
 													>
@@ -801,7 +793,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
 
 													{user && (
 														<>
-															{/* Web search feature - simplified for now */}
 															{user.role === 'admin' && (
 																<button
 																	onClick={() => setWebSearchEnabled(!webSearchEnabled)}
@@ -865,7 +856,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
 																toast.error('Select only one model to call');
 																return;
 															}
-															// Simplified audio check - assume web STT for now
 															toast.error(
 																'Call feature is not supported when using Web STT engine'
 															);

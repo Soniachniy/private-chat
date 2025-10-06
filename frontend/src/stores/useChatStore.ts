@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Chat, ChatInfo, ChatStore, Model, Message, ChatHistory } from '../types';
+import type { Chat, ChatInfo, ChatStore, Model, Message } from '../types';
 
 export const useChatStore = create<ChatStore>((set) => ({
 	chats: [],
@@ -10,8 +10,6 @@ export const useChatStore = create<ChatStore>((set) => ({
 	isLoading: false,
 	models: [],
 	selectedModels: [''],
-	history: { messages: {}, currentId: null },
-	streamingMessage: null,
 
 	setModels: (models: Model[]) => set({ models }),
 
@@ -30,51 +28,85 @@ export const useChatStore = create<ChatStore>((set) => ({
 	setLoading: (loading: boolean) => set({ isLoading: loading }),
 	setSelectedModels: (models: string[]) => set({ selectedModels: models }),
 
-	// Message management
-	setHistory: (history: ChatHistory) => set({ history }),
-
 	addMessage: (message: Message) =>
-		set((state) => ({
-			history: {
-				...state.history,
-				messages: {
-					...state.history.messages,
-					[message.id]: message
-				},
-				currentId: message.id
-			}
-		})),
+		set((state) => {
+			if (!state.currentChat) return state;
 
-	updateMessage: (messageId: string, update: Partial<Message>) =>
-		set((state) => ({
-			history: {
-				...state.history,
-				messages: {
-					...state.history.messages,
-					[messageId]: {
-						...state.history.messages[messageId],
-						...update
+			return {
+				currentChat: {
+					...state.currentChat,
+					chat: {
+						...state.currentChat.chat,
+						history: {
+							...state.currentChat.chat.history,
+							messages: {
+								...state.currentChat.chat.history.messages,
+								[message.id]: message
+							},
+							currentId: message.id
+						},
+						messages: [...state.currentChat.chat.messages, message]
 					}
 				}
-			}
-		})),
+			};
+		}),
 
-	setStreamingMessage: (message: Message | null) => set({ streamingMessage: message }),
+	updateMessage: (messageId: string, update: Partial<Message>) =>
+		set((state) => {
+			if (!state.currentChat) return state;
+
+			const currentMessage = state.currentChat.chat.history.messages[messageId];
+			if (!currentMessage) return state;
+
+			const updatedMessage = { ...currentMessage, ...update };
+
+			return {
+				currentChat: {
+					...state.currentChat,
+					chat: {
+						...state.currentChat.chat,
+						history: {
+							...state.currentChat.chat.history,
+							messages: {
+								...state.currentChat.chat.history.messages,
+								[messageId]: updatedMessage
+							}
+						},
+						messages: state.currentChat.chat.messages.map((msg) =>
+							msg.id === messageId ? updatedMessage : msg
+						)
+					}
+				}
+			};
+		}),
 
 	appendToMessage: (messageId: string, content: string) =>
 		set((state) => {
-			const message = state.history.messages[messageId];
+			if (!state.currentChat) return state;
+
+			const message = state.currentChat.chat.history.messages[messageId];
 			if (!message) return state;
 
+			const updatedMessage = {
+				...message,
+				content: message.content + content
+			};
+
 			return {
-				history: {
-					...state.history,
-					messages: {
-						...state.history.messages,
-						[messageId]: {
-							...message,
-							content: message.content + content
-						}
+				currentChat: {
+					...state.currentChat,
+					chat: {
+						...state.currentChat.chat,
+						history: {
+							...state.currentChat.chat.history,
+							messages: {
+								...state.currentChat.chat.history.messages,
+								[messageId]: updatedMessage
+							}
+						},
+						messages: state.currentChat.chat.messages.map((msg) =>
+							msg.id === messageId ? updatedMessage : msg
+						)
 					}
 				}
 			};

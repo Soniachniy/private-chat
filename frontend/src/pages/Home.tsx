@@ -37,9 +37,8 @@ const Home: React.FC = () => {
 		addMessage,
 		addChat,
 		updateMessage,
-		setStreamingMessage,
-		models,
-		streamingMessage
+		currentChat,
+		models
 	} = useChatStore();
 
 	const { data: chat, isLoading: isChatLoading } = useChat(currentChatId);
@@ -141,7 +140,6 @@ const Home: React.FC = () => {
 
 			// Add assistant message to store
 			addMessage(assistantMessage);
-			setStreamingMessage(assistantMessage);
 
 			// Update parent-child relationship
 			updateMessage(userMessageId, {
@@ -218,20 +216,16 @@ const Home: React.FC = () => {
 		},
 		onError: (error) => {
 			console.error('Failed to send message:', error);
-			setStreamingMessage(null);
-			// Remove the assistant message if it was created but the request failed
-			if (currentChatId) {
-				// Mark the message as error if it exists in history
-				if (streamingMessage) {
-					updateMessage(streamingMessage.id, {
-						content: 'Failed to get response. Please try again.',
-						done: true,
-						error: true
-					});
-				}
-			}
 		}
 	});
+
+	useEffect(() => {
+		console.log(
+			'currentChat',
+			currentChat,
+			Object.values(currentChat?.chat.history.messages || {}).length
+		);
+	}, [currentChat, Object.values(currentChat?.chat.history.messages || {}).length]);
 
 	if (isChatLoading) {
 		return (
@@ -259,8 +253,9 @@ const Home: React.FC = () => {
 			</>
 		);
 	}
-	const messages = Object.values(chat?.chat.history.messages || []);
 
+	const messages = Object.values(currentChat?.chat.history.messages || []);
+	console.log('messages', currentChat, messages, messages.length);
 	return (
 		<div className="flex flex-col h-full bg-gray-900">
 			{/* Messages */}

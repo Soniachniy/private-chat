@@ -94,7 +94,6 @@ const UserMessage: React.FC<UserMessageProps> = ({
 		>
 			<div className="flex-auto w-0 max-w-full pl-1">
 				<div className={`chat-${message.role} w-full min-w-full markdown-prose`}>
-					{/* Files */}
 					{/* {message.files && message.files.length > 0 && (
 						<div className="mt-2.5 mb-1 w-full flex flex-col justify-end overflow-x-auto gap-1 flex-wrap">
 							{message.files.map((file) => (
@@ -124,7 +123,6 @@ const UserMessage: React.FC<UserMessageProps> = ({
 						</div>
 					)} */}
 
-					{/* Content */}
 					{message.content !== '' && (
 						<>
 							{edit ? (
@@ -174,7 +172,6 @@ const UserMessage: React.FC<UserMessageProps> = ({
 									</div>
 
 									<div className={`flex justify-end text-gray-600 dark:text-gray-500`}>
-										{/* Action buttons */}
 										{!readOnly && (
 											<button
 												className="invisible group-hover:visible p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg dark:hover:text-white hover:text-black transition edit-user-message-button"
@@ -249,7 +246,6 @@ const UserMessage: React.FC<UserMessageProps> = ({
 				</div>
 			</div>
 
-			{/* Delete Confirmation Dialog */}
 			{showDeleteConfirm && (
 				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
 					<div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">

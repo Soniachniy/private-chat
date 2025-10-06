@@ -33,12 +33,10 @@ export default function Navbar() {
 
 				<div className="flex max-w-full w-full mx-auto px-1 pt-1 bg-transparent">
 					<div className="flex w-full max-w-full">
-						{/* Left Sidebar Controls */}
 						{!isLeftSidebarOpen && (
 							<div
 								className={`mr-2 md:mr-4 pt-0.5 gap-y-3 self-start flex flex-col text-gray-600 dark:text-gray-400`}
 							>
-								{/* Expand Sidebar Button */}
 								<button
 									type="button"
 									className="text-white shadow h-8 w-8 cursor-pointer rounded flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-850 dark:bg-[rgba(248,248,248,0.04)]"
@@ -54,8 +52,6 @@ export default function Navbar() {
 										/>
 									</svg>
 								</button>
-
-								{/* New Chat Button */}
 								<button
 									id="new-chat-button"
 									type="button"
@@ -81,14 +77,11 @@ export default function Navbar() {
 							</div>
 						)}
 
-						{/* Center Content */}
 						<div className="flex-1 overflow-hidden max-w-full py-0.5 flex items-center justify-center">
 							<ModelSelector />
 						</div>
 
-						{/* Right Side Controls */}
 						<div className="self-start flex flex-none items-center text-gray-600 dark:text-gray-400">
-							{/* Chat Menu Button */}
 							{currentChatId && (
 								<button
 									className="flex cursor-pointer px-2 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-850 transition"

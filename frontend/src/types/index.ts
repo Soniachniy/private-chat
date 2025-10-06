@@ -287,8 +287,6 @@ export interface ChatStore {
 	isLoading: boolean;
 	models: Model[];
 	selectedModels: string[];
-	history: ChatHistory;
-	streamingMessage: Message | null;
 
 	setChats: (chats: ChatInfo[]) => void;
 	setCurrentChat: (chat: Chat | null) => void;
@@ -298,11 +296,9 @@ export interface ChatStore {
 	deleteChat: (id: string) => void;
 	setLoading: (loading: boolean) => void;
 	setSelectedModels: (models: string[]) => void;
-	setHistory: (history: ChatHistory) => void;
+
 	addMessage: (message: Message) => void;
 	updateMessage: (messageId: string, update: Partial<Message>) => void;
-	setStreamingMessage: (message: Message | null) => void;
-
 	appendToMessage: (messageId: string, content: string) => void;
 }
 

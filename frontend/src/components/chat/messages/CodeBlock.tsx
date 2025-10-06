@@ -20,17 +20,14 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ lang, code, className = 'my-2', o
 	const [saved, setSaved] = useState(false);
 	const codeRef = useRef<HTMLElement>(null);
 
-	// Update edited code when code prop changes
 	useEffect(() => {
 		setEditedCode(code);
 	}, [code]);
 
 	useEffect(() => {
 		if (codeRef.current && !collapsed) {
-			// Remove any existing highlighting
 			codeRef.current.removeAttribute('data-highlighted');
 
-			// Apply syntax highlighting
 			if (lang) {
 				try {
 					const language = hljs.getLanguage(lang) ? lang : 'plaintext';
@@ -80,16 +77,12 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ lang, code, className = 'my-2', o
 
 	return (
 		<div className={`relative ${className} flex flex-col rounded-lg`} dir="ltr">
-			{/* Language badge */}
 			<div className="text-gray-500 dark:text-gray-400 absolute pl-4 py-1.5 text-xs font-medium">
 				{lang || 'plaintext'}
 			</div>
 
-			{/* Action buttons */}
 			<div className="sticky top-8 mb-1 py-1 pr-2.5 flex items-center justify-end z-10 text-xs">
 				<div className="flex items-center gap-0.5 translate-y-[1px]">
-					{/* Collapse/Expand button */}
-
 					<button
 						className="flex gap-1 items-center bg-gray-50 hover:bg-gray-100 dark:bg-gray-850 dark:hover:bg-gray-800 transition rounded-md px-1.5 py-0.5"
 						onClick={toggleCollapse}
@@ -120,8 +113,6 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ lang, code, className = 'my-2', o
 						<span>{saved ? 'Saved' : 'Save'}</span>
 					</button>
 
-					{/* Copy button */}
-
 					<button
 						className="flex gap-1 items-center bg-gray-50 hover:bg-gray-100 dark:bg-gray-850 dark:hover:bg-gray-800 transition rounded-md px-1.5 py-0.5"
 						onClick={copyCode}
@@ -140,7 +131,6 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ lang, code, className = 'my-2', o
 				</div>
 			</div>
 
-			{/* Code content */}
 			<div
 				className={`language-${lang} rounded-t-lg -mt-8 ${collapsed ? 'rounded-b-lg' : ''} overflow-hidden`}
 			>

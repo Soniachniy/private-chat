@@ -11,14 +11,14 @@ initI18n(localStorage?.locale);
 const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
-			staleTime: 1000 * 60 * 5, // 5 minutes
-			gcTime: 1000 * 60 * 10 // 10 minutes
+			staleTime: 1000 * 60 * 5,
+			gcTime: 1000 * 60 * 10
 		}
 	}
 });
 
 createRoot(document.getElementById('root')!).render(
-	// <React.StrictMode>
+	// <React.StrictMode> // React strict mode make two socket connection in dev mode
 	<QueryClientProvider client={queryClient}>
 		<BrowserRouter>
 			<ThemeProvider>
