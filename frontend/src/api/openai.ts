@@ -144,6 +144,40 @@ class OpenAIClient {
 			updated_at: Date.now()
 		};
 	}
+	async updateChatById(token: string, id: string, chat: object) {
+		let error = null;
+
+		const res = await fetch(`${this.baseURL}/v1/chats/${id}`, {
+			method: 'POST',
+			headers: {
+				Accept: 'application/json',
+				'Content-Type': 'application/json',
+				...(token && { authorization: `Bearer ${token}` })
+			},
+			body: JSON.stringify({
+				chat: chat
+			})
+		})
+			.then(async (res) => {
+				if (!res.ok) throw await res.json();
+				return res.json();
+			})
+			.then((json) => {
+				return json;
+			})
+			.catch((err) => {
+				error = err;
+
+				console.log(err);
+				return null;
+			});
+
+		if (error) {
+			throw error;
+		}
+
+		return res;
+	}
 
 	async deleteChat(id: string): Promise<void> {
 		await new Promise((resolve) => setTimeout(resolve, 300));

@@ -65,14 +65,17 @@ const LeftSidebar: React.FC = () => {
 	const [isChatsOpen, setIsChatsOpen] = useState(true);
 
 	//TODO: add actions to the chat dropdown items
-	const chatDropdownItems = useMemo(() => [
-		{ title: t('Pin'), icon: <Bookmark stroke="white" />, type: DropdownType.Item },
-		{ title: t('Rename'), icon: <Pencil stroke="white" />, type: DropdownType.Item },
-		{ title: t('Clone'), icon: <Clone stroke="white" />, type: DropdownType.Item },
-		{ title: t('Archive'), icon: <Archive stroke="white" />, type: DropdownType.Item },
-		{ title: t('Download'), icon: <Download stroke="white" />, type: DropdownType.Item },
-		{ title: t('Delete'), icon: <Trash stroke="white" />, type: DropdownType.Item }
-	], [t]);
+	const chatDropdownItems = useMemo(
+		() => [
+			{ title: t('Pin'), icon: <Bookmark stroke="white" />, type: DropdownType.Item },
+			{ title: t('Rename'), icon: <Pencil stroke="white" />, type: DropdownType.Item },
+			{ title: t('Clone'), icon: <Clone stroke="white" />, type: DropdownType.Item },
+			{ title: t('Archive'), icon: <Archive stroke="white" />, type: DropdownType.Item },
+			{ title: t('Download'), icon: <Download stroke="white" />, type: DropdownType.Item },
+			{ title: t('Delete'), icon: <Trash stroke="white" />, type: DropdownType.Item }
+		],
+		[t]
+	);
 
 	const dropdownItems = useMemo(
 		() => [
@@ -89,16 +92,21 @@ const LeftSidebar: React.FC = () => {
 				action: () => setIsArchivedChatsOpen(true)
 			},
 			{ type: DropdownType.Separator },
-			{ title: t('Sign Out'), icon: <SignOutIcon />, type: DropdownType.Item, action: async () => {
-				try {
-					await authClient.signOut();
-					setUser(null);
-					localStorage.removeItem('token');
-					navigate(APP_ROUTES.AUTH);
-				} catch (error) {
-					console.error('Error signing out', error);
+			{
+				title: t('Sign Out'),
+				icon: <SignOutIcon />,
+				type: DropdownType.Item,
+				action: async () => {
+					try {
+						await authClient.signOut();
+						setUser(null);
+						localStorage.removeItem('token');
+						navigate(APP_ROUTES.AUTH);
+					} catch (error) {
+						console.error('Error signing out', error);
+					}
 				}
-			} }
+			}
 		],
 		[t, navigate, setUser]
 	);
@@ -187,7 +195,7 @@ const LeftSidebar: React.FC = () => {
 							<div className="flex flex-col flex-1 w-full  rounded-lg  py-[6px]  group-hover:bg-gray-100 dark:group-hover:bg-gray-950 whitespace-nowrap text-ellipsis">
 								{isChatsOpen &&
 									chatsGroupedByFolder.map(([timeRange, chats], index) => (
-										<div>
+										<div key={index}>
 											<div
 												className={cn(
 													'w-full 5 text-xs text-gray-500 pl-2.5 dark:text-gray-500 font-medium  pb-1.5',
@@ -247,7 +255,7 @@ const LeftSidebar: React.FC = () => {
 										<>
 											<div className="self-center mr-3">
 												<img
-													src={user?.profile_image_url || UserIcon}
+													src={UserIcon}
 													alt="User"
 													className=" max-w-[30px] object-cover rounded-full"
 												/>

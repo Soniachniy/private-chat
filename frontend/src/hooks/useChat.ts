@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { openAIClient } from '../api/openai';
 import { useChatStore } from '../stores/useChatStore';
-import type { ChatInfo } from '../types';
+import type { ChatInfo, Message } from '../types';
 
 export const useChats = () => {
 	const { setChats } = useChatStore();
@@ -16,10 +16,17 @@ export const useChats = () => {
 	});
 };
 
-export const useChat = (chatId?: string) => {
+export const useChat = (setCurrentMessages: (messages: Message[]) => void, chatId?: string) => {
+	const { setCurrentChat } = useChatStore();
 	return useQuery({
 		queryKey: ['chat', chatId],
-		queryFn: () => openAIClient.getChatById(chatId!),
+		queryFn: async () => {
+			const chat = await openAIClient.getChatById(chatId!);
+			console.log(chat);
+			setCurrentChat(chat);
+			setCurrentMessages(Object.values(chat.chat.history.messages));
+			return chat;
+		},
 		enabled: !!chatId
 	});
 };

@@ -79,7 +79,6 @@ export const useChatStore = create<ChatStore>((set) => ({
 				}
 			};
 		}),
-
 	appendToMessage: (messageId: string, content: string) =>
 		set((state) => {
 			if (!state.currentChat) return state;

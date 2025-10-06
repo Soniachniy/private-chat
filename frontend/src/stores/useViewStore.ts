@@ -19,7 +19,7 @@ export const useViewStore = create<ViewStore>()(
 				console.log('ViewStore rehydrated:', state);
 				// Force sidebar to be open on app start
 				if (state) {
-					state.isLeftSidebarOpen = true;
+					state.isLeftSidebarOpen = window.innerWidth > 768 ? true : false;
 				}
 			}
 		}

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import MessageInput from '@/components/chat/MessageInput';
 import ChatPlaceholder from '@/components/chat/ChatPlaceholder';
@@ -13,7 +13,7 @@ import type { Message, ChatHistory } from '@/types';
 
 import { v4 as uuidv4 } from 'uuid';
 import Navbar from '@/components/chat/Navbar';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { TEMP_API_BASE_URL } from '@/api/constants';
 import { openAIClient } from '@/api/openai';
 import MessageSkeleton from '@/components/chat/MessageSkeleton';
@@ -29,30 +29,17 @@ const Home: React.FC = () => {
 	const { chatId } = useParams<{ chatId: string }>();
 	const params = useParams();
 	const navigate = useNavigate();
-	const queryClient = useQueryClient();
+
 	const currentChatId = chatId || params.chatId;
-	const {
-		setCurrentChat,
-		selectedModels,
-		addMessage,
-		addChat,
-		updateMessage,
-		currentChat,
-		models
-	} = useChatStore();
-
-	const { data: chat, isLoading: isChatLoading } = useChat(currentChatId);
-	const { socket } = useChatWebSocket();
-
-	useEffect(() => {
-		if (currentChatId) {
-			setCurrentChat(chat || null);
-		}
-	}, [currentChatId, setCurrentChat, chat]);
+	const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
+	const { selectedModels, addMessage, addChat, updateMessage, currentChat, models } =
+		useChatStore();
+	const messagesContainerElement = useRef<HTMLDivElement>(null);
+	const { isLoading: isChatLoading } = useChat(setCurrentMessages, currentChatId);
+	const { socket } = useChatWebSocket(setCurrentMessages);
 
 	const handleSendMessage = async (content: string) => {
-		console.log('Send message:', content);
-
+		if (!content || !selectedModels.length) return;
 		sendPromptMutation(
 			{
 				prompt: content,
@@ -70,12 +57,12 @@ const Home: React.FC = () => {
 
 	const handleEditMessage = (messageId: string, content: string) => {
 		console.log('Edit message:', messageId, content);
-		// Update the message in the chat
+		updateMessage(messageId, { content });
 	};
 
 	const handleSaveMessage = (messageId: string, content: string) => {
 		console.log('Save message:', messageId, content);
-		handleEditMessage(messageId, content);
+		updateMessage(messageId, { content });
 	};
 
 	const handleDeleteMessage = (messageId: string) => {
@@ -121,6 +108,7 @@ const Home: React.FC = () => {
 
 			// Add user message to store
 			addMessage(userMessage);
+			setCurrentMessages((prevMessages: Message[]) => [...prevMessages, userMessage]);
 
 			// Create assistant message
 			const assistantMessageId = uuidv4();
@@ -131,7 +119,7 @@ const Home: React.FC = () => {
 				childrenIds: [],
 				role: 'assistant',
 				content: '',
-				timestamp: Math.floor(Date.now()),
+				timestamp: Math.floor(Date.now() / 1000),
 				models: [selectedModel],
 				modelName: modelInfo?.name || selectedModel,
 				model: selectedModel,
@@ -140,13 +128,37 @@ const Home: React.FC = () => {
 
 			// Add assistant message to store
 			addMessage(assistantMessage);
+			setCurrentMessages((prevMessages: Message[]) => [...prevMessages, assistantMessage]);
 
-			// Update parent-child relationship
+			userMessage.childrenIds = [assistantMessageId];
 			updateMessage(userMessageId, {
 				childrenIds: [assistantMessageId]
 			});
+			setCurrentMessages((prevMessages: Message[]) => {
+				const message = prevMessages.find((message) => message.id === userMessageId);
+				if (message) {
+					message.childrenIds = [assistantMessageId];
+				}
+				return prevMessages;
+			});
 
-			// Create or update chat
+			const updatedChat = await openAIClient.updateChatById(token, chatId!, {
+				messages: [...currentMessages, userMessage, assistantMessage],
+				history: {
+					...currentChat?.chat.history,
+					messages: {
+						...currentChat?.chat.history.messages,
+						[userMessageId]: userMessage,
+						[assistantMessageId]: assistantMessage
+					},
+					currentId: assistantMessageId
+				},
+				models: selectedModels,
+				params: currentChat?.chat.params,
+				files: currentChat?.chat.files
+			});
+			console.log('updatedChat', updatedChat);
+
 			let currentChatId = chatId;
 			if (!currentChatId) {
 				// Create new chat
@@ -177,7 +189,20 @@ const Home: React.FC = () => {
 				});
 			}
 
-			// Send chat completion request
+			// Build messages array with full conversation history
+			const allMessages = [...currentMessages, userMessage].map((msg) => ({
+				role: msg.role,
+				content: msg.content,
+				...(msg.files ? { files: msg.files } : {})
+			}));
+
+			// Get model item for the selected model
+			const modelItem = models.find((m) => m.id === selectedModel);
+
+			// Determine if this is the first message in a new chat (for background tasks)
+			const isFirstMessage = allMessages.length === 1;
+
+			// Send chat completion request with all required fields matching Svelte implementation
 			const response = await fetch(`${TEMP_API_BASE_URL}/api/chat/completions`, {
 				method: 'POST',
 				headers: {
@@ -186,16 +211,31 @@ const Home: React.FC = () => {
 				},
 				body: JSON.stringify({
 					model: selectedModel,
-					messages: [
-						{
-							role: 'user',
-							content: prompt
-						}
-					],
+					messages: allMessages,
 					stream: true,
+					params: {}, // Model-specific parameters
+					files: [], // Files attached to the chat
+					tool_ids: [], // Selected tool IDs
+					tool_servers: [], // Tool servers configuration
+					features: {
+						image_generation: false,
+						code_interpreter: false,
+						web_search: false
+					},
+					variables: {}, // Template variables
+					model_item: modelItem || {}, // Full model object
 					session_id: socket?.id || undefined,
 					chat_id: currentChatId,
-					message_id: assistantMessageId
+					id: assistantMessageId, // CRITICAL: Backend expects "id", not "message_id"
+					// Only include background_tasks for the first message
+					...(isFirstMessage
+						? {
+								background_tasks: {
+									title_generation: true,
+									tags_generation: true
+								}
+							}
+						: {})
 				})
 			});
 
@@ -204,29 +244,25 @@ const Home: React.FC = () => {
 				throw new Error(error.detail || 'Failed to send message');
 			}
 
+			messagesContainerElement.current?.scrollIntoView({ behavior: 'smooth' });
+
 			return {
 				chatId: currentChatId,
 				userMessageId,
 				assistantMessageId
 			};
 		},
-		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: ['chat', data.chatId] });
-			queryClient.invalidateQueries({ queryKey: ['chats'] });
-		},
 		onError: (error) => {
 			console.error('Failed to send message:', error);
 		}
 	});
 
-	useEffect(() => {
-		console.log(
-			'currentChat',
-			currentChat,
-			Object.values(currentChat?.chat.history.messages || {}).length
-		);
-	}, [currentChat, Object.values(currentChat?.chat.history.messages || {}).length]);
+	useLayoutEffect(() => {
+		console.log('currentMessages.length', currentMessages.length);
+		messagesContainerElement.current?.scrollIntoView({ behavior: 'smooth' });
+	}, [currentMessages.length]);
 
+	console.log('currentMessages', currentMessages);
 	if (isChatLoading) {
 		return (
 			<div className="flex items-center justify-center h-full">
@@ -254,29 +290,23 @@ const Home: React.FC = () => {
 		);
 	}
 
-	const messages = Object.values(currentChat?.chat.history.messages || []);
-	console.log('messages', currentChat, messages, messages.length);
+	console.log(currentMessages, currentChat, currentMessages.length);
 	return (
 		<div className="flex flex-col h-full bg-gray-900">
 			{/* Messages */}
 			<Navbar />
-			<div className="flex-1 overflow-y-auto px-4 py-4 pt-8 space-y-4">
+			<div className="flex-1 overflow-y-auto px-4 py-4 pt-8 space-y-4" id="messages-container">
 				{/* Messages */}
-				{messages.map((message, idx) => {
-					// Create a mock history object for the message components
-					const mockHistory: ChatHistory = {
-						messages: { [message.id]: message },
-						currentId: message.id
-					};
-
-					// Get siblings for navigation
-					const siblings = messages.map((m) => m.id);
+				{currentMessages.map((message, idx) => {
+					// Use the actual history from store instead of creating a mock
+					// This ensures all message operations work correctly with the backup
+					const siblings = currentMessages.map((m) => m.id);
 
 					if (message.role === 'user') {
 						return (
 							<UserMessage
 								key={message.id}
-								history={mockHistory}
+								history={currentChat?.chat.history || { messages: {}, currentId: null }}
 								messageId={message.id}
 								siblings={siblings}
 								isFirstMessage={idx === 0}
@@ -286,18 +316,18 @@ const Home: React.FC = () => {
 							/>
 						);
 					} else if (message.content === '' && !message.error) {
-						return <MessageSkeleton />;
+						console.log('MessageSkeleton', message);
+						return <MessageSkeleton key={message.id} />;
 					} else {
-						// For assistant messages, check if it's a multi-response scenario
 						const hasMultipleResponses = message.childrenIds && message.childrenIds.length > 1;
 
 						if (hasMultipleResponses) {
 							return (
 								<MultiResponseMessages
 									key={message.id}
-									history={mockHistory}
+									history={currentChat?.chat.history || { messages: {}, currentId: null }}
 									messageId={message.id}
-									isLastMessage={idx === messages.length - 1}
+									isLastMessage={idx === currentMessages.length - 1}
 									readOnly={false}
 									webSearchEnabled={false}
 									saveMessage={handleSaveMessage}
@@ -310,10 +340,10 @@ const Home: React.FC = () => {
 							return (
 								<ResponseMessage
 									key={message.id}
-									history={mockHistory}
+									history={currentChat?.chat.history || { messages: {}, currentId: null }}
 									messageId={message.id}
 									siblings={siblings}
-									isLastMessage={idx === messages.length - 1}
+									isLastMessage={idx === currentMessages.length - 1}
 									readOnly={false}
 									webSearchEnabled={false}
 									saveMessage={handleSaveMessage}
@@ -324,10 +354,11 @@ const Home: React.FC = () => {
 						}
 					}
 				})}
+				<div ref={messagesContainerElement} />
 			</div>
 
 			<MessageInput
-				messages={messages}
+				messages={currentChat?.chat.messages}
 				onSubmit={handleSendMessage}
 				createMessagePair={handleSendMessage}
 			/>

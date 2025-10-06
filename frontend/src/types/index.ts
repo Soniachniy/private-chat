@@ -291,6 +291,7 @@ export interface ChatStore {
 	setChats: (chats: ChatInfo[]) => void;
 	setCurrentChat: (chat: Chat | null) => void;
 	setModels: (models: Model[]) => void;
+
 	addChat: (chat: ChatInfo) => void;
 	updateChat: (id: string, chat: Partial<ChatInfo>) => void;
 	deleteChat: (id: string) => void;

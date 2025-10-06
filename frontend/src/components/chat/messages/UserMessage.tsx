@@ -29,7 +29,8 @@ const UserMessage: React.FC<UserMessageProps> = ({
 	const messageEditTextAreaRef = useRef<HTMLTextAreaElement>(null);
 
 	const message = history.messages[messageId];
-	const [editedContent, setEditedContent] = useState(message.content);
+	console.log('message', message);
+	const [editedContent, setEditedContent] = useState(message?.content || '');
 
 	useEffect(() => {
 		if (edit && messageEditTextAreaRef.current) {
@@ -40,11 +41,11 @@ const UserMessage: React.FC<UserMessageProps> = ({
 
 	const handleEdit = () => {
 		setEdit(true);
-		setEditedContent(message.content);
+		setEditedContent(message?.content || '');
 	};
 
 	const handleSave = () => {
-		if (editedContent.trim() !== message.content) {
+		if (editedContent.trim() !== message?.content) {
 			editMessage(messageId, editedContent.trim());
 		}
 		setEdit(false);

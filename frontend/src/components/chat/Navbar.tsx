@@ -1,12 +1,14 @@
 import SafeLogo from '@/assets/images/safe.svg';
 import { useCreateChat } from '@/hooks/useChat';
 import { useViewStore } from '@/stores/useViewStore';
+
 import { useNavigate, useParams } from 'react-router';
 import ModelSelector from './ModelSelector';
 
 export default function Navbar() {
 	const { isLeftSidebarOpen, isRightSidebarOpen, setIsRightSidebarOpen, setIsLeftSidebarOpen } =
 		useViewStore();
+
 	const { chatId } = useParams<{ chatId: string }>();
 	const params = useParams();
 	const currentChatId = chatId || params.chatId;
@@ -77,7 +79,7 @@ export default function Navbar() {
 							</div>
 						)}
 
-						<div className="flex-1 overflow-hidden max-w-full py-0.5 flex items-center justify-center">
+						<div className="flex-1 overflow-hidden max-w-full py-0.5 flex  justify-center">
 							<ModelSelector />
 						</div>
 
