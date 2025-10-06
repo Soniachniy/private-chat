@@ -2,7 +2,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 
 type ConfirmDialogProps = {
     title: string;
-    description: string;
+    description: React.ReactNode;
     onConfirm: () => void;
     onCancel: () => void;
     confirmText?: string;

@@ -12,16 +12,21 @@ import { useAppInitialization } from './stores/useAppInitialization';
 
 import { useSettingsStore } from './stores/useSettingsStore';
 import { APP_ROUTES } from './pages/routes';
+import { useChats } from './hooks/useChat';
+import { useUserStore } from './stores/useUserStore';
 
 function App() {
 	const { isInitialized, isLoading: isAppLoading, initializeApp } = useAppInitialization();
+	const { user } = useUserStore();
+	const { isLoading: isChatLoading } = useChats();
+
 	const { settings } = useSettingsStore();
 
 	useEffect(() => {
 		initializeApp();
 	}, [initializeApp]);
 
-	if (!isInitialized || isAppLoading) {
+	if (!isInitialized || isAppLoading || (user && isChatLoading)) {
 		return <LoadingScreen />;
 	}
 

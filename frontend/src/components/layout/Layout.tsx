@@ -1,5 +1,5 @@
 import React from 'react';
-import LeftSidebar from './LeftSidebar';
+import LeftSidebar from '@/components/sidebar';
 import ChatVerifier from '../chat/ChatVerifier';
 import { Outlet } from 'react-router';
 

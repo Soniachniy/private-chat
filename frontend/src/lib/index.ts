@@ -1,3 +1,4 @@
+import type { ChatHistory, Message } from "@/types";
 
 export const copyToClipboard = async (text: string): Promise<boolean> => {
 	let result = false;
@@ -48,5 +49,18 @@ export const validateJSON = (json: string): boolean => {
 		return obj && typeof obj === 'object';
 	} catch {
 		return false;
+	}
+};
+
+export const createMessagesList = (history: ChatHistory, messageId: string): Message[] => {
+	if (messageId === null) {
+		return [];
+	}
+
+	const message = history.messages[messageId];
+	if (message?.parentId) {
+		return [...createMessagesList(history, message.parentId), message];
+	} else {
+		return [message];
 	}
 };
