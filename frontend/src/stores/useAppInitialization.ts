@@ -46,6 +46,7 @@ export const useAppInitialization = create<AppInitializationStore>((set, get) =>
 
 					useUserStore.getState().setUser(user);
 					useChatStore.getState().setModels(models);
+					useChatStore.getState().setSelectedModels([models[0].id]);
 					console.log('User loaded:', user);
 
 					if (user) {

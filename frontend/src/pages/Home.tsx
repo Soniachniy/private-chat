@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import MessageInput from '@/components/chat/MessageInput';
 import ChatPlaceholder from '@/components/chat/ChatPlaceholder';
@@ -13,7 +13,7 @@ import type { Message, ChatHistory } from '@/types';
 
 import { v4 as uuidv4 } from 'uuid';
 import Navbar from '@/components/chat/Navbar';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { TEMP_API_BASE_URL } from '@/api/constants';
 import { openAIClient } from '@/api/openai';
 import MessageSkeleton from '@/components/chat/MessageSkeleton';
@@ -27,13 +27,12 @@ interface SendPromptParams {
 
 const Home: React.FC = () => {
 	const { chatId } = useParams<{ chatId: string }>();
-	const params = useParams();
+	const [currentChatId, setCurrentChatId] = useState<string | undefined>(chatId);
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 
-	const currentChatId = chatId || params.chatId;
 	const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
-	const { selectedModels, addMessage, addChat, updateMessage, currentChat, models } =
-		useChatStore();
+	const { selectedModels, addMessage, updateMessage, currentChat, models } = useChatStore();
 	const messagesContainerElement = useRef<HTMLDivElement>(null);
 	const { isLoading: isChatLoading } = useChat(setCurrentMessages, currentChatId);
 	const { socket } = useChatWebSocket(setCurrentMessages);
@@ -78,7 +77,7 @@ const Home: React.FC = () => {
 	};
 
 	const { mutate: sendPromptMutation } = useMutation({
-		mutationFn: async ({ prompt, chatId, model, files }: SendPromptParams) => {
+		mutationFn: async ({ prompt, model, files }: SendPromptParams) => {
 			const token = localStorage.getItem('token');
 			if (!token) throw new Error('No token found');
 
@@ -141,8 +140,31 @@ const Home: React.FC = () => {
 				}
 				return prevMessages;
 			});
+			let localChatId = currentChatId;
+			if (!localChatId) {
+				// Create new chat
+				const newChatHistory: ChatHistory = {
+					messages: {
+						[userMessageId]: userMessage,
+						[assistantMessageId]: assistantMessage
+					},
+					currentId: assistantMessageId
+				};
+				const newChat = await openAIClient.createNewChat(token, {
+					id: uuidv4(),
+					title: prompt.slice(0, 50),
+					models: [selectedModel],
+					history: newChatHistory,
+					messages: [userMessage, assistantMessage],
+					timestamp: Date.now()
+				});
 
-			const updatedChat = await openAIClient.updateChatById(token, chatId!, {
+				queryClient.invalidateQueries({ queryKey: ['chats'] });
+				setCurrentChatId(newChat.id);
+				localChatId = newChat.id;
+			}
+
+			const updatedChat = await openAIClient.updateChatById(token, localChatId!, {
 				messages: [...currentMessages, userMessage, assistantMessage],
 				history: {
 					...currentChat?.chat.history,
@@ -158,36 +180,6 @@ const Home: React.FC = () => {
 				files: currentChat?.chat.files
 			});
 			console.log('updatedChat', updatedChat);
-
-			let currentChatId = chatId;
-			if (!currentChatId) {
-				// Create new chat
-				const newChatHistory: ChatHistory = {
-					messages: {
-						[userMessageId]: userMessage,
-						[assistantMessageId]: assistantMessage
-					},
-					currentId: assistantMessageId
-				};
-
-				const newChat = await openAIClient.createNewChat(token, {
-					id: uuidv4(),
-					title: prompt.slice(0, 50),
-					models: [selectedModel],
-					history: newChatHistory,
-					messages: [userMessage, assistantMessage],
-					timestamp: Date.now()
-				});
-
-				currentChatId = newChat.id;
-				addChat({
-					id: newChat.id,
-					title: prompt.slice(0, 50),
-					content: prompt,
-					created_at: Date.now(),
-					updated_at: new Date().toISOString()
-				});
-			}
 
 			// Build messages array with full conversation history
 			const allMessages = [...currentMessages, userMessage].map((msg) => ({
@@ -225,7 +217,7 @@ const Home: React.FC = () => {
 					variables: {}, // Template variables
 					model_item: modelItem || {}, // Full model object
 					session_id: socket?.id || undefined,
-					chat_id: currentChatId,
+					chat_id: localChatId,
 					id: assistantMessageId, // CRITICAL: Backend expects "id", not "message_id"
 					// Only include background_tasks for the first message
 					...(isFirstMessage
@@ -252,17 +244,24 @@ const Home: React.FC = () => {
 				assistantMessageId
 			};
 		},
+		onSuccess: () => {},
 		onError: (error) => {
 			console.error('Failed to send message:', error);
 		}
 	});
 
-	useLayoutEffect(() => {
-		console.log('currentMessages.length', currentMessages.length);
-		messagesContainerElement.current?.scrollIntoView({ behavior: 'smooth' });
-	}, [currentMessages.length]);
+	useEffect(() => {
+		setCurrentChatId(chatId);
 
-	console.log('currentMessages', currentMessages);
+		messagesContainerElement.current?.scrollIntoView({ behavior: 'smooth' });
+
+		const element = document.getElementById('messages-container');
+		element?.scrollTo({
+			top: element.scrollHeight,
+			behavior: 'smooth'
+		});
+	}, [chatId]);
+
 	if (isChatLoading) {
 		return (
 			<div className="flex items-center justify-center h-full">
@@ -290,7 +289,7 @@ const Home: React.FC = () => {
 		);
 	}
 
-	console.log(currentMessages, currentChat, currentMessages.length);
+	// console.log(currentMessages, currentChat, currentMessages.length);
 	return (
 		<div className="flex flex-col h-full bg-gray-900">
 			{/* Messages */}

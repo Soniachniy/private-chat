@@ -145,7 +145,6 @@ export const useChatWebSocket = (
 			}
 
 			if (content) {
-				console.log('Content:', content);
 				setCurrentMessages((prevMessages: Message[]) => {
 					const prveMessage = prevMessages.find((message) => message.id === messageId);
 					if (prveMessage) {
