@@ -48,11 +48,6 @@ export const useAppInitialization = create<AppInitializationStore>((set, get) =>
 					useChatStore.getState().setModels(models);
 					useChatStore.getState().setSelectedModels([models[0].id]);
 					console.log('User loaded:', user);
-
-					if (user) {
-						const chats = await openAIClient.getChats();
-						useChatStore.getState().setChats(chats);
-					}
 				} catch (error) {
 					console.error('Failed to load user data:', error);
 

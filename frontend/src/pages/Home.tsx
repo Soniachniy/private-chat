@@ -15,8 +15,8 @@ import { v4 as uuidv4 } from 'uuid';
 import Navbar from '@/components/chat/Navbar';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { TEMP_API_BASE_URL } from '@/api/constants';
-import { openAIClient } from '@/api/openai';
 import MessageSkeleton from '@/components/chat/MessageSkeleton';
+import { chatClient } from '@/api/chat';
 
 interface SendPromptParams {
 	prompt: string;
@@ -150,7 +150,7 @@ const Home: React.FC = () => {
 					},
 					currentId: assistantMessageId
 				};
-				const newChat = await openAIClient.createNewChat(token, {
+				const newChat = await chatClient.createNewChat({
 					id: uuidv4(),
 					title: prompt.slice(0, 50),
 					models: [selectedModel],
@@ -164,7 +164,7 @@ const Home: React.FC = () => {
 				localChatId = newChat.id;
 			}
 
-			const updatedChat = await openAIClient.updateChatById(token, localChatId!, {
+			const updatedChat = await chatClient.updateChatById(localChatId!, {
 				messages: [...currentMessages, userMessage, assistantMessage],
 				history: {
 					...currentChat?.chat.history,
