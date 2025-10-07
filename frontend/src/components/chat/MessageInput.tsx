@@ -2,12 +2,13 @@ import type { Message } from '@/types';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
-import HeadsetIcon from '@/assets/icons/headset.svg?react';
 import { useUserStore } from '@/stores/useUserStore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
 import UserIcon from '@/assets/icons/user-icon.png';
 import { cn } from '@/lib/utils';
 import { useViewStore } from '@/stores/useViewStore';
+import { TEMP_API_BASE_URL } from '@/api/constants';
+import SendMessageIcon from '@/assets/icons/send-message.svg?react';
 
 interface Model {
 	id: string;
@@ -87,15 +88,34 @@ const WEBUI_BASE_URL = '';
 const WEBUI_API_BASE_URL = '';
 const PASTED_TEXT_CHARACTER_LIMIT = 50000;
 
-// Mock API functions - these would need to be implemented
-const uploadFile = async () => {
-	// Mock implementation
-	return {
-		id: uuidv4(),
-		meta: { collection_name: 'uploads' },
-		collection_name: 'uploads',
-		error: undefined
-	};
+const uploadFile = async (token: string, file: File) => {
+	const data = new FormData();
+	data.append('file', file);
+	let error = null;
+
+	const res = await fetch(`${TEMP_API_BASE_URL}/api/v1/files/`, {
+		method: 'POST',
+		headers: {
+			Accept: 'application/json',
+			authorization: `Bearer ${token}`
+		},
+		body: data
+	})
+		.then(async (res) => {
+			if (!res.ok) throw await res.json();
+			return res.json();
+		})
+		.catch((err) => {
+			error = err.detail;
+			console.log(err);
+			return null;
+		});
+
+	if (error) {
+		throw error;
+	}
+
+	return res;
 };
 
 const deleteFileById = async (fileId: string) => {
@@ -131,7 +151,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
 	const { user } = useUserStore();
 	const { settings } = useSettingsStore();
 	const [loaded, setLoaded] = useState(false);
-	const [recording, setRecording] = useState(false);
 	const [isComposing, setIsComposing] = useState(false);
 	const [dragged, setDragged] = useState(false);
 	const [showTools, setShowTools] = useState(false);
@@ -159,72 +178,71 @@ const MessageInput: React.FC<MessageInputProps> = ({
 			webSearchEnabled
 		});
 	}, [prompt, files, selectedToolIds, imageGenerationEnabled, webSearchEnabled, onChange]);
-	const uploadFileHandler = useCallback(
-		async (file: File, fullContext: boolean = false) => {
-			if (user?.role !== 'admin') {
-				toast.error('You do not have permission to upload files.');
-				return null;
-			}
 
-			const tempItemId = uuidv4();
-			const fileItem: FileItem = {
-				type: 'file',
-				file: {
-					id: tempItemId,
-					meta: { collection_name: 'uploads' },
-					collection_name: 'uploads'
-				},
-				id: '',
-				url: '',
-				name: file.name,
-				collection_name: '',
-				status: 'uploading',
-				size: file.size,
-				error: '',
-				itemId: tempItemId,
-				...(fullContext ? { context: 'full' } : {})
-			};
+	const uploadFileHandler = useCallback(async (file: File, fullContext: boolean = false) => {
+		const token = localStorage.getItem('token');
 
-			if (fileItem.size === 0) {
-				toast.error('You cannot upload an empty file.');
-				return null;
-			}
+		if (!token) {
+			toast.error('No token found');
+			return null;
+		}
+		const tempItemId = uuidv4();
+		const fileItem: FileItem = {
+			type: 'file',
+			file: {
+				id: tempItemId,
+				meta: { collection_name: 'uploads' },
+				collection_name: 'uploads'
+			},
+			id: '',
+			url: '',
+			name: file.name,
+			collection_name: '',
+			status: 'uploading',
+			size: file.size,
+			error: '',
+			itemId: tempItemId,
+			...(fullContext ? { context: 'full' } : {})
+		};
 
-			setFiles((prev) => [...prev, fileItem]);
+		if (fileItem.size === 0) {
+			toast.error('You cannot upload an empty file.');
+			return null;
+		}
 
-			try {
-				const uploadedFile = await uploadFile();
+		setFiles((prev) => [...prev, fileItem]);
 
-				if (uploadedFile) {
-					if (uploadedFile.error) {
-						toast.error(uploadedFile.error);
-					}
+		try {
+			const uploadedFile = await uploadFile(token, file);
 
-					setFiles((prev) =>
-						prev.map((item) =>
-							item.itemId === tempItemId
-								? ({
-										...item,
-										status: 'uploaded' as const,
-										file: uploadedFile,
-										id: uploadedFile.id,
-										collection_name:
-											uploadedFile?.meta?.collection_name || uploadedFile?.collection_name || '',
-										url: `${WEBUI_API_BASE_URL}/files/${uploadedFile.id}`
-									} as FileItem)
-								: item
-						)
-					);
-				} else {
-					setFiles((prev) => prev.filter((item) => item.itemId !== tempItemId));
+			if (uploadedFile) {
+				if (uploadedFile.error) {
+					toast.error(uploadedFile.error);
 				}
-			} catch (e) {
-				toast.error(`Upload failed: ${e}`);
+
+				setFiles((prev) =>
+					prev.map((item) =>
+						item.itemId === tempItemId
+							? ({
+									...item,
+									status: 'uploaded' as const,
+									file: uploadedFile,
+									id: uploadedFile.id,
+									collection_name:
+										uploadedFile?.meta?.collection_name || uploadedFile?.collection_name || '',
+									url: `${WEBUI_API_BASE_URL}/files/${uploadedFile.id}`
+								} as FileItem)
+							: item
+					)
+				);
+			} else {
 				setFiles((prev) => prev.filter((item) => item.itemId !== tempItemId));
 			}
-		},
-		[user]
-	);
+		} catch (e) {
+			toast.error(`Upload failed: ${e}`);
+			setFiles((prev) => prev.filter((item) => item.itemId !== tempItemId));
+		}
+	}, []);
 
 	const inputFilesHandler = useCallback(
 		async (inputFiles: File[]) => {
@@ -581,149 +599,103 @@ const MessageInput: React.FC<MessageInputProps> = ({
 								}}
 							/>
 
-							{recording ? (
-								<div className="w-full p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
-									<div className="flex items-center justify-between">
-										<div className="flex items-center gap-3">
-											<div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-											<span className="text-red-700 dark:text-red-300 font-medium">
-												Recording...
-											</span>
-										</div>
-										<div className="flex gap-2">
-											<button
-												onClick={() => setRecording(false)}
-												className="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded"
-											>
-												Cancel
-											</button>
-											<button
-												onClick={() => {
-													setRecording(false);
-													// Handle recording confirmation
-												}}
-												className="px-3 py-1 text-sm bg-red-500 hover:bg-red-600 text-white rounded"
-											>
-												Stop
-											</button>
-										</div>
-									</div>
-								</div>
-							) : (
-								<form className="w-full flex gap-1.5" onSubmit={handleSubmit}>
-									<div
-										className="flex-1 flex flex-col relative w-full shadow-lg rounded-3xl border app-chat-input border-gray-50 dark:border-gray-850 hover:border-gray-100 focus-within:border-gray-100 hover:dark:border-gray-800 focus-within:dark:border-gray-800 transition px-1 bg-white/90 dark:bg-gray-400/5 dark:text-gray-100"
-										dir={settings.chatDirection ?? 'auto'}
-									>
-										{files.length > 0 && (
-											<div className="mx-2 mt-2.5 -mb-1 flex items-center flex-wrap gap-2">
-												{files.map((file, fileIdx) => (
-													<div key={fileIdx}>
-														{file.type === 'image' ? (
-															<div className="relative group">
-																<div className="relative flex items-center">
-																	<img
-																		src={file.url}
-																		alt="input"
-																		className="size-14 rounded-xl object-cover"
-																	/>
-																	{(atSelectedModel
-																		? visionCapableModels.length === 0
-																		: selectedModels.length !== visionCapableModels.length) && (
-																		<div className="absolute top-1 left-1">
-																			<svg
-																				xmlns="http://www.w3.org/2000/svg"
-																				viewBox="0 0 24 24"
-																				fill="currentColor"
-																				className="size-4 fill-yellow-300"
-																			>
-																				<path
-																					fillRule="evenodd"
-																					d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
-																					clipRule="evenodd"
-																				/>
-																			</svg>
-																		</div>
-																	)}
-																</div>
-																<div className="absolute -top-1 -right-1">
-																	<button
-																		className="bg-white text-black border border-white rounded-full group-hover:visible invisible transition"
-																		type="button"
-																		onClick={() => removeFile(fileIdx)}
-																	>
+							<form className="w-full flex gap-1.5" onSubmit={handleSubmit}>
+								<div
+									className="flex-1 flex flex-col relative w-full shadow-lg rounded-3xl border app-chat-input border-gray-50 dark:border-gray-850 hover:border-gray-100 focus-within:border-gray-100 hover:dark:border-gray-800 focus-within:dark:border-gray-800 transition px-1 bg-white/90 dark:bg-gray-400/5 dark:text-gray-100"
+									dir={settings.chatDirection ?? 'auto'}
+								>
+									{files.length > 0 && (
+										<div className="mx-2 mt-2.5 -mb-1 flex items-center flex-wrap gap-2">
+											{files.map((file, fileIdx) => (
+												<div key={fileIdx}>
+													{file.type === 'image' ? (
+														<div className="relative group">
+															<div className="relative flex items-center">
+																<img
+																	src={file.url}
+																	alt="input"
+																	className="size-14 rounded-xl object-cover"
+																/>
+																{(atSelectedModel
+																	? visionCapableModels.length === 0
+																	: selectedModels.length !== visionCapableModels.length) && (
+																	<div className="absolute top-1 left-1">
 																		<svg
 																			xmlns="http://www.w3.org/2000/svg"
-																			viewBox="0 0 20 20"
+																			viewBox="0 0 24 24"
 																			fill="currentColor"
-																			className="size-4"
+																			className="size-4 fill-yellow-300"
 																		>
-																			<path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+																			<path
+																				fillRule="evenodd"
+																				d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
+																				clipRule="evenodd"
+																			/>
 																		</svg>
-																	</button>
-																</div>
+																	</div>
+																)}
 															</div>
-														) : (
-															<div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-2">
-																<div className="flex items-center gap-2 flex-1">
-																	<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-																		<path
-																			fillRule="evenodd"
-																			d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-																			clipRule="evenodd"
-																		/>
-																	</svg>
-																	<span className="text-sm">{file.name}</span>
-																	{file.status === 'uploading' && (
-																		<div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
-																	)}
-																</div>
+															<div className="absolute -top-1 -right-1">
 																<button
+																	className="bg-white text-black border border-white rounded-full group-hover:visible invisible transition"
+																	type="button"
 																	onClick={() => removeFile(fileIdx)}
-																	className="text-gray-500 hover:text-red-500"
 																>
-																	<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-																		<path
-																			fillRule="evenodd"
-																			d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-																			clipRule="evenodd"
-																		/>
+																	<svg
+																		xmlns="http://www.w3.org/2000/svg"
+																		viewBox="0 0 20 20"
+																		fill="currentColor"
+																		className="size-4"
+																	>
+																		<path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
 																	</svg>
 																</button>
 															</div>
-														)}
-													</div>
-												))}
-											</div>
-										)}
-
-										<div className="px-2.5">
-											{(settings.richTextInput ?? true) ? (
-												<div
-													className="scrollbar-hidden text-left bg-transparent dark:text-gray-100 outline-hidden w-full pt-3 px-1 resize-none h-fit max-h-80 overflow-auto"
-													id="chat-input-container"
-												>
-													<textarea
-														ref={chatInputRef}
-														id="chat-input"
-														className="bg-transparent w-full min-h-[20px] resize-none outline-none border-none"
-														placeholder={placeholder || 'Send a Message'}
-														value={prompt}
-														onChange={(e) => setPrompt(e.target.value)}
-														onKeyDown={handleKeyDown}
-														onPaste={handlePaste}
-														onCompositionStart={() => setIsComposing(true)}
-														onCompositionEnd={() => setIsComposing(false)}
-														rows={1}
-														style={{ lineHeight: '1.5' }}
-													/>
+														</div>
+													) : (
+														<div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-2">
+															<div className="flex items-center gap-2 flex-1">
+																<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+																	<path
+																		fillRule="evenodd"
+																		d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+																		clipRule="evenodd"
+																	/>
+																</svg>
+																<span className="text-sm">{file.name}</span>
+																{file.status === 'uploading' && (
+																	<div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+																)}
+															</div>
+															<button
+																onClick={() => removeFile(fileIdx)}
+																className="text-gray-500 hover:text-red-500"
+															>
+																<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+																	<path
+																		fillRule="evenodd"
+																		d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+																		clipRule="evenodd"
+																	/>
+																</svg>
+															</button>
+														</div>
+													)}
 												</div>
-											) : (
+											))}
+										</div>
+									)}
+
+									<div className="px-2.5">
+										{(settings.richTextInput ?? true) ? (
+											<div
+												className="scrollbar-hidden text-left bg-transparent dark:text-gray-100 outline-hidden w-full pt-3 px-1 resize-none h-fit max-h-80 overflow-auto"
+												id="chat-input-container"
+											>
 												<textarea
-													id="chat-input"
-													dir="auto"
 													ref={chatInputRef}
-													className="scrollbar-hidden bg-transparent dark:text-gray-100 outline-hidden w-full pt-3 px-1 resize-none"
+													id="chat-input"
+													className="bg-transparent w-full min-h-[20px] resize-none outline-none border-none"
 													placeholder={placeholder || 'Send a Message'}
 													value={prompt}
 													onChange={(e) => setPrompt(e.target.value)}
@@ -732,42 +704,95 @@ const MessageInput: React.FC<MessageInputProps> = ({
 													onCompositionStart={() => setIsComposing(true)}
 													onCompositionEnd={() => setIsComposing(false)}
 													rows={1}
+													style={{ lineHeight: '1.5' }}
 												/>
-											)}
-										</div>
+											</div>
+										) : (
+											<textarea
+												id="chat-input"
+												dir="auto"
+												ref={chatInputRef}
+												className="scrollbar-hidden bg-transparent dark:text-gray-100 outline-hidden w-full pt-3 px-1 resize-none"
+												placeholder={placeholder || 'Send a Message'}
+												value={prompt}
+												onChange={(e) => setPrompt(e.target.value)}
+												onKeyDown={handleKeyDown}
+												onPaste={handlePaste}
+												onCompositionStart={() => setIsComposing(true)}
+												onCompositionEnd={() => setIsComposing(false)}
+												rows={1}
+											/>
+										)}
+									</div>
 
-										<div className="flex justify-between mt-1 mb-2.5 mx-0.5 max-w-full" dir="ltr">
-											<div className="ml-1 self-end flex items-center flex-1 max-w-[80%] gap-0.5">
-												<div className="relative">
+									<div className="flex justify-between mt-1 mb-2.5 mx-0.5 max-w-full" dir="ltr">
+										<div className="ml-1 self-end flex items-center flex-1 max-w-[80%] gap-0.5">
+											<div className="relative">
+												<button
+													className="bg-transparent hover:bg-gray-100 text-gray-800 dark:text-white dark:hover:bg-gray-800 transition rounded-full p-1.5 outline-hidden focus:outline-hidden"
+													type="button"
+													aria-label="More"
+													onClick={() => {
+														filesInputRef.current?.click();
+													}}
+												>
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														viewBox="0 0 20 20"
+														fill="currentColor"
+														className="size-5"
+													>
+														<path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+													</svg>
+												</button>
+											</div>
+
+											<div className="flex gap-1 items-center overflow-x-auto scrollbar-none flex-1">
+												{toolServers.length + selectedToolIds.length > 0 && (
 													<button
-														className="bg-transparent hover:bg-gray-100 text-gray-800 dark:text-white dark:hover:bg-gray-800 transition rounded-full p-1.5 outline-hidden focus:outline-hidden"
+														className="translate-y-[0.5px] flex gap-1 items-center text-gray-600 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200 rounded-lg p-1 self-center transition"
+														aria-label="Available Tools"
 														type="button"
-														aria-label="More"
-														onClick={() => {
-															filesInputRef.current?.click();
-														}}
+														onClick={() => setShowTools(!showTools)}
 													>
 														<svg
-															xmlns="http://www.w3.org/2000/svg"
-															viewBox="0 0 20 20"
-															fill="currentColor"
-															className="size-5"
+															className="size-4"
+															fill="none"
+															stroke="currentColor"
+															viewBox="0 0 24 24"
 														>
-															<path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+															<path
+																strokeLinecap="round"
+																strokeLinejoin="round"
+																strokeWidth={1.75}
+																d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+															/>
+															<path
+																strokeLinecap="round"
+																strokeLinejoin="round"
+																strokeWidth={1.75}
+																d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+															/>
 														</svg>
+														<span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+															{toolServers.length + selectedToolIds.length}
+														</span>
 													</button>
-												</div>
+												)}
 
-												<div className="flex gap-1 items-center overflow-x-auto scrollbar-none flex-1">
-													{toolServers.length + selectedToolIds.length > 0 && (
+												{user && (
+													<>
 														<button
-															className="translate-y-[0.5px] flex gap-1 items-center text-gray-600 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200 rounded-lg p-1 self-center transition"
-															aria-label="Available Tools"
+															onClick={() => setWebSearchEnabled(!webSearchEnabled)}
 															type="button"
-															onClick={() => setShowTools(!showTools)}
+															className={`px-1 py-0.5 flex gap-1.5 items-center text-xs rounded-full font-medium transition-colors duration-300 focus:outline-hidden max-w-full overflow-hidden border ${
+																webSearchEnabled
+																	? 'bg-blue-100 dark:bg-blue-500/20 border-blue-400/20 text-blue-500'
+																	: 'bg-transparent border-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+															}`}
 														>
 															<svg
-																className="size-4"
+																className="size-5"
 																fill="none"
 																stroke="currentColor"
 																viewBox="0 0 24 24"
@@ -776,125 +801,57 @@ const MessageInput: React.FC<MessageInputProps> = ({
 																	strokeLinecap="round"
 																	strokeLinejoin="round"
 																	strokeWidth={1.75}
-																	d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-																/>
-																<path
-																	strokeLinecap="round"
-																	strokeLinejoin="round"
-																	strokeWidth={1.75}
-																	d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+																	d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
 																/>
 															</svg>
-															<span className="text-sm font-medium text-gray-600 dark:text-gray-300">
-																{toolServers.length + selectedToolIds.length}
+															<span className="hidden xl:block whitespace-nowrap overflow-hidden text-ellipsis translate-y-[0.5px]">
+																Web Search
 															</span>
 														</button>
-													)}
-
-													{user && (
-														<>
-															{user.role === 'admin' && (
-																<button
-																	onClick={() => setWebSearchEnabled(!webSearchEnabled)}
-																	type="button"
-																	className={`px-1 py-0.5 flex gap-1.5 items-center text-xs rounded-full font-medium transition-colors duration-300 focus:outline-hidden max-w-full overflow-hidden border ${
-																		webSearchEnabled
-																			? 'bg-blue-100 dark:bg-blue-500/20 border-blue-400/20 text-blue-500'
-																			: 'bg-transparent border-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-																	}`}
-																>
-																	<svg
-																		className="size-5"
-																		fill="none"
-																		stroke="currentColor"
-																		viewBox="0 0 24 24"
-																	>
-																		<path
-																			strokeLinecap="round"
-																			strokeLinejoin="round"
-																			strokeWidth={1.75}
-																			d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
-																		/>
-																	</svg>
-																	<span className="hidden xl:block whitespace-nowrap overflow-hidden text-ellipsis translate-y-[0.5px]">
-																		Web Search
-																	</span>
-																</button>
-															)}
-														</>
-													)}
-												</div>
-											</div>
-
-											<div className="self-end flex space-x-1 mr-1 shrink-0">
-												{(taskIds && taskIds.length > 0) ||
-												(history?.currentId &&
-													history.messages?.[history.currentId]?.done !== true) ? (
-													<button
-														className="bg-white hover:bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-800 transition rounded-full p-1.5"
-														onClick={stopResponse}
-													>
-														<svg
-															xmlns="http://www.w3.org/2000/svg"
-															viewBox="0 0 24 24"
-															fill="currentColor"
-															className="size-5"
-														>
-															<path
-																fillRule="evenodd"
-																d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm6-2.438c0-.724.588-1.312 1.313-1.312h4.874c.725 0 1.313.588 1.313 1.313v4.874c0 .725-.588 1.313-1.313 1.313H9.564a1.312 1.312 0 01-1.313-1.313V9.564z"
-																clipRule="evenodd"
-															/>
-														</svg>
-													</button>
-												) : prompt === '' && files.length === 0 && user?.role === 'admin' ? (
-													<button
-														className="bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-100 transition rounded-full p-1.5 self-center"
-														type="button"
-														onClick={async () => {
-															if (selectedModels.length > 1) {
-																toast.error('Select only one model to call');
-																return;
-															}
-															toast.error(
-																'Call feature is not supported when using Web STT engine'
-															);
-															return;
-														}}
-														aria-label="Call"
-													>
-														<HeadsetIcon className="size-5" />
-													</button>
-												) : (
-													<button
-														id="send-message-button"
-														className={`${
-															!(prompt === '' && files.length === 0)
-																? 'bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-100'
-																: 'text-white bg-gray-200 dark:text-gray-900 dark:bg-gray-700 disabled'
-														} transition rounded-full p-1.5 self-center`}
-														type="submit"
-														disabled={prompt === '' && files.length === 0}
-													>
-														<svg
-															xmlns="http://www.w3.org/2000/svg"
-															viewBox="0 0 16 16"
-															fill="currentColor"
-															className="size-5"
-														>
-															<path
-																fillRule="evenodd"
-																d="M8 14a.75.75 0 0 1-.75-.75V4.56L4.03 7.78a.75.75 0 0 1-1.06-1.06l4.5-4.5a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1-1.06 1.06L8.75 4.56v8.69A.75.75 0 0 1 8 14Z"
-																clipRule="evenodd"
-															/>
-														</svg>
-													</button>
+													</>
 												)}
 											</div>
 										</div>
+
+										<div className="self-end flex space-x-1 mr-1 shrink-0">
+											{(taskIds && taskIds.length > 0) ||
+											(history?.currentId &&
+												history.messages?.[history.currentId]?.done !== true) ? (
+												<button
+													className="bg-white hover:bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-800 transition rounded-full p-1.5"
+													onClick={stopResponse}
+												>
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														viewBox="0 0 24 24"
+														fill="currentColor"
+														className="size-5"
+													>
+														<path
+															fillRule="evenodd"
+															d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm6-2.438c0-.724.588-1.312 1.313-1.312h4.874c.725 0 1.313.588 1.313 1.313v4.874c0 .725-.588 1.313-1.313 1.313H9.564a1.312 1.312 0 01-1.313-1.313V9.564z"
+															clipRule="evenodd"
+														/>
+													</svg>
+												</button>
+											) : (
+												<button
+													id="send-message-button"
+													className={`${
+														!(prompt === '' && files.length === 0)
+															? 'bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-100'
+															: 'text-white bg-gray-200 dark:text-gray-900 dark:bg-gray-700 disabled'
+													} transition rounded-full p-1.5 self-center`}
+													type="submit"
+													disabled={prompt === '' && files.length === 0}
+												>
+													<SendMessageIcon className="size-5" />
+												</button>
+											)}
+										</div>
 									</div>
-								</form>
-							)}
+								</div>
+							</form>
 						</div>
 					</div>
 				</div>

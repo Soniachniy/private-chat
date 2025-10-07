@@ -102,7 +102,7 @@ const ResponseMessage: React.FC<ResponseMessageProps> = ({
 	}, [message?.content]);
 
 	if (!message) return null;
-
+	console.log('message', message);
 	return (
 		<div
 			className="flex w-full group"
@@ -133,8 +133,7 @@ const ResponseMessage: React.FC<ResponseMessageProps> = ({
 
 				<div className={`chat-${message.role} w-full min-w-full markdown-prose`}>
 					<div>
-						{/* Files TODO: Add files */}
-						{/* {message.files && message.files.length > 0 && (
+						{message.files && message.files.length > 0 && (
 							<div className="my-1 w-full flex overflow-x-auto gap-2 flex-wrap">
 								{message.files.map((file) => (
 									<div key={file.id}>
@@ -161,9 +160,8 @@ const ResponseMessage: React.FC<ResponseMessageProps> = ({
 									</div>
 								))}
 							</div>
-						)} */}
+						)}
 
-						{/* Edit Mode */}
 						{edit ? (
 							<div className="w-full bg-gray-50 dark:bg-gray-800 rounded-3xl px-5 py-3 my-2">
 								<textarea

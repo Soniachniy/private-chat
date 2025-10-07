@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import NearAIIcon from '@/assets/icons/near-icon-green.svg?react';
 import Bolt from '@heroicons/react/24/outline/BoltIcon';
-import HeadsetIcon from '@/assets/icons/headset.svg?react';
+import SendMessageIcon from '@/assets/icons/send-message.svg?react';
 
 import Fuse from 'fuse.js';
 
@@ -17,7 +17,7 @@ interface ChatPlaceholderProps {
 	submitVoice: (value: string) => void;
 }
 
-const ChatPlaceholder: React.FC<ChatPlaceholderProps> = ({ submitPrompt, submitVoice }) => {
+const ChatPlaceholder: React.FC<ChatPlaceholderProps> = ({ submitPrompt }) => {
 	const [inputValue, setInputValue] = useState('');
 	const [filteredPrompts, setFilteredPrompts] = useState<Prompt[]>([]);
 
@@ -98,40 +98,20 @@ const ChatPlaceholder: React.FC<ChatPlaceholderProps> = ({ submitPrompt, submitV
 											<div className="ml-1 self-end flex items-center flex-1 max-w-[80%]"></div>
 
 											<div className="self-end flex space-x-1 mr-1 shrink-0">
-												{inputValue === '' ? (
-													<div className="flex items-center">
-														<button
-															className="bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-100 transition rounded-full p-1.5 self-center"
-															type="button"
-															onClick={() => submitVoice('')}
-															aria-label="Voice mode"
-														>
-															<HeadsetIcon className="w-5 h-5" />
-														</button>
-													</div>
-												) : (
-													<div className="flex items-center">
-														<button
-															className="bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-100 transition rounded-full p-1.5 self-center"
-															type="button"
-															onClick={() => handleSubmit(inputValue)}
-															aria-label="Send message"
-														>
-															<svg
-																xmlns="http://www.w3.org/2000/svg"
-																viewBox="0 0 16 16"
-																fill="currentColor"
-																className="w-5 h-5"
-															>
-																<path
-																	fillRule="evenodd"
-																	d="M8 14a.75.75 0 0 1-.75-.75V4.56L4.03 7.78a.75.75 0 0 1-1.06-1.06l4.5-4.5a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1-1.06 1.06L8.75 4.56v8.69A.75.75 0 0 1 8 14Z"
-																	clipRule="evenodd"
-																/>
-															</svg>
-														</button>
-													</div>
-												)}
+												<div className="flex items-center">
+													<button
+														className={`${
+															!(inputValue === '')
+																? 'bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-100'
+																: 'text-white bg-gray-200 dark:text-gray-900 dark:bg-gray-700 disabled'
+														} transition rounded-full p-1.5 self-center`}
+														type="button"
+														onClick={() => handleSubmit(inputValue)}
+														aria-label="Send message"
+													>
+														<SendMessageIcon className="w-5 h-5" />
+													</button>
+												</div>
 											</div>
 										</div>
 									</div>

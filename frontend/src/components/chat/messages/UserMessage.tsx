@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import type { ChatHistory } from '@/types';
 import { useSettingsStore } from '@/stores/useSettingsStore';
+import FileItem from '@/components/FileItem';
 
 interface UserMessageProps {
 	history: ChatHistory;
@@ -95,34 +96,19 @@ const UserMessage: React.FC<UserMessageProps> = ({
 		>
 			<div className="flex-auto w-0 max-w-full pl-1">
 				<div className={`chat-${message.role} w-full min-w-full markdown-prose`}>
-					{/* {message.files && message.files.length > 0 && (
+					{message.files && message.files.length > 0 && (
 						<div className="mt-2.5 mb-1 w-full flex flex-col justify-end overflow-x-auto gap-1 flex-wrap">
 							{message.files.map((file) => (
 								<div key={file.id} className={'self-end'}>
 									{file.type === 'image' ? (
 										<img src={file.url} alt={file.name} className="max-h-96 rounded-lg" />
 									) : (
-										<div className="flex items-center space-x-2 text-xs text-gray-500 bg-white dark:bg-gray-850 p-2 rounded">
-											<svg
-												className="w-4 h-4"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
-											>
-												<path
-													strokeLinecap="round"
-													strokeLinejoin="round"
-													strokeWidth={2}
-													d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-												/>
-											</svg>
-											<span>{file.name}</span>
-										</div>
+										<FileItem file={file} />
 									)}
 								</div>
 							))}
 						</div>
-					)} */}
+					)}
 
 					{message.content !== '' && (
 						<>

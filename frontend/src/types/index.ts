@@ -63,7 +63,7 @@ export interface Message {
 	model?: string;
 	error?: boolean;
 	sources?: unknown[];
-	files?: unknown[];
+	files?: File[];
 	usage?: {
 		prompt_tokens?: number;
 		completion_tokens?: number;
@@ -327,4 +327,7 @@ export interface File {
 	type: string;
 	url?: string;
 	content?: string;
+	data?: {
+		content?: string;
+	};
 }
