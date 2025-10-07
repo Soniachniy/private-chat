@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { MessageSignature } from '@/api/nearai';
+import type { MessageSignature } from '@/api/nearai/client';
 
 interface MessagesSignaturesState {
 	messagesSignatures: Record<string, MessageSignature>;

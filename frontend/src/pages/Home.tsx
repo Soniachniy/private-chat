@@ -5,10 +5,10 @@ import ChatPlaceholder from '@/components/chat/ChatPlaceholder';
 import UserMessage from '@/components/chat/messages/UserMessage';
 import ResponseMessage from '@/components/chat/messages/ResponseMessage';
 import MultiResponseMessages from '@/components/chat/messages/MultiResponseMessages';
-import { useChat } from '@/hooks/useChat';
-import { useChatStore } from '@/stores/useChatStore';
-import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 
+import { useChatStore } from '@/stores/useChatStore';
+import { useChatWebSocket } from '@/api/chat/websocket/useChatWebSocket';
+import { useChatById } from '@/api/chat/queries';
 import type { Message, ChatHistory } from '@/types';
 
 import { v4 as uuidv4 } from 'uuid';
@@ -16,7 +16,7 @@ import Navbar from '@/components/chat/Navbar';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { TEMP_API_BASE_URL } from '@/api/constants';
 import MessageSkeleton from '@/components/chat/MessageSkeleton';
-import { chatClient } from '@/api/chat';
+import { chatClient } from '@/api/chat/client';
 
 interface SendPromptParams {
 	prompt: string;
@@ -34,7 +34,7 @@ const Home: React.FC = () => {
 	const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
 	const { selectedModels, addMessage, updateMessage, currentChat, models } = useChatStore();
 	const messagesContainerElement = useRef<HTMLDivElement>(null);
-	const { isLoading: isChatLoading } = useChat(setCurrentMessages, currentChatId);
+	const { isLoading: isChatLoading } = useChatById({ id: currentChatId || '', setCurrentMessages }, { enabled: !!currentChatId });
 	const { socket } = useChatWebSocket(setCurrentMessages);
 
 	const handleSendMessage = async (content: string) => {

@@ -11,7 +11,7 @@ import {
 	ArrowTopRightOnSquareIcon
 } from '@heroicons/react/24/outline';
 import { copyToClipboard } from '@/lib/index';
-import { nearAIClient, type ModelAttestationReport } from '@/api/nearai';
+import { nearAIClient, type ModelAttestationReport } from '@/api/nearai/client';
 import IntelLogo from '@/assets/images/intel-2.svg';
 import NvidiaLogo from '@/assets/images/nvidia-2.svg';
 import type { VerificationStatus } from './types';

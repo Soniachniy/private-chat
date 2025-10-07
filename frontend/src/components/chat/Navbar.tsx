@@ -1,7 +1,6 @@
 import SafeLogo from '@/assets/images/safe.svg';
-import { useCreateChat } from '@/hooks/useChat';
 import { useViewStore } from '@/stores/useViewStore';
-
+import { useCreateChat } from '@/api/chat/queries';
 import { useNavigate, useParams } from 'react-router';
 import ModelSelector from './ModelSelector';
 
@@ -13,14 +12,14 @@ export default function Navbar() {
 	const params = useParams();
 	const currentChatId = chatId || params.chatId;
 	const navigate = useNavigate();
-	const createChatMutation = useCreateChat();
+	const createChat = useCreateChat();
 
 	const handleNewChat = async () => {
 		try {
-			const newChat = await createChatMutation.mutateAsync('');
+			const newChat = createChat('New Chat');
 			navigate(`/c/${newChat.id}`);
 		} catch (error) {
-			console.error('Failed to create new chat:', error);
+			console.error('Failed to create new chat:', error);	
 		}
 	};
 

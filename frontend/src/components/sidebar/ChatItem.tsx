@@ -5,7 +5,7 @@ import type { ChatInfo } from "@/types";
 import { useRef, useState } from "react";
 import { CompactTooltip } from "../ui/tooltip";
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { useRenameChatById } from "@/hooks/useChat";
+import { useRenameChat } from "@/api/chat/queries";
 
 type ChatItemProps = {
     chat: ChatInfo;
@@ -16,10 +16,10 @@ const ChatItem = ({ chat, isCurrentChat }: ChatItemProps) => {
     const [showRename, setShowRename] = useState(false);
     const renameRef = useRef<HTMLInputElement>(null);
     const [renameInput, setRenameInput] = useState(chat.title);
-    const { mutate: renameChat } = useRenameChatById();
+    const { mutate: renameChat } = useRenameChat();
 
     const confirmRename = () => {
-        renameChat({ chatId: chat.id, title: renameInput });
+        renameChat({ id: chat.id, title: renameInput });
         setShowRename(false);
     };
 
