@@ -5,7 +5,7 @@ import NearAIIcon from '@/assets/icons/near-icon-green.svg?react';
 import CheckIcon from '@/assets/icons/check-icon.svg?react';
 import GoogleIcon from '@/assets/icons/google-icon.svg?react';
 import GitHubIcon from '@/assets/icons/github-icon.svg?react';
-import { authClient } from '@/api/auth';
+import { authClient } from '@/api/auth/client';
 import type { OAuth2Provider } from '@/types';
 import { useConfigStore } from '@/stores/useConfig';
 

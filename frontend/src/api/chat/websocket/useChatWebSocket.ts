@@ -1,8 +1,8 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 
 import { io, Socket } from 'socket.io-client';
-import { useChatStore } from '../stores/useChatStore';
-import { TEMP_API_BASE_URL } from '../api/constants';
+import { useChatStore } from '../../../stores/useChatStore';
+import { TEMP_API_BASE_URL } from '../../constants';
 import type { Message } from '@/types';
 
 interface ChatEventData {

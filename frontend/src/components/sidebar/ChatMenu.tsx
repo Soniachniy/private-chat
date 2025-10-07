@@ -20,10 +20,10 @@ import TrashIcon from '@heroicons/react/24/outline/TrashIcon';
 
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { useArchiveChatById, useToggleChatPinnedStatusById, useDeleteChatById, useCloneChatById, useChatPinnedStatusById } from "@/hooks/useChat";
+import { useArchiveChat, useTogglePinnedStatus, useDeleteChat, useCloneChat, useChatPinnedStatus } from "@/api/chat/queries";
 import ConfirmDialog from "../common/dialogs/ConfirmDialog";
 import { useState } from "react";
-import { chatClient } from "@/api/chat";
+import { chatClient } from "@/api/chat/client";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 
 import FileSaver from 'file-saver';
@@ -42,23 +42,23 @@ export default function ChatMenu({
 }: ChatMenuProps) {
 	const { t } = useTranslation('translation', { useSuspense: false });
 	const { settings } = useSettingsStore();
-	const { data: isPinned } = useChatPinnedStatusById(chat.id);
-	const { mutate: toggleChatPinnedStatusById } = useToggleChatPinnedStatusById();
-	const { mutate: cloneChatById } = useCloneChatById();
-	const { mutate: archiveChatById } = useArchiveChatById();
-	const { mutate: deleteChatById } = useDeleteChatById();
+	const { data: isPinned } = useChatPinnedStatus({ id: chat.id });
+	const { mutate: toggleChatPinnedStatusById } = useTogglePinnedStatus();
+	const { mutate: cloneChatById } = useCloneChat();
+	const { mutate: archiveChatById } = useArchiveChat();
+	const { mutate: deleteChatById } = useDeleteChat();
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
 	const handlePinToggle = () => {
-		toggleChatPinnedStatusById(chat.id);
+		toggleChatPinnedStatusById({ id: chat.id });
 	};
 
 	const handleClone = () => {
-		cloneChatById(chat.id);
+		cloneChatById({ id: chat.id });
 	};
 
 	const handleArchive = () => {
-		archiveChatById(chat.id);
+		archiveChatById({ id: chat.id });
 	};
 
 	const handleDelete = () => {
@@ -181,7 +181,7 @@ export default function ChatMenu({
             <ConfirmDialog 
                 title={t('Delete chat?')}
                 description={<>{t('This will delete')} <span className="font-semibold">{chat.title}</span></>}
-                onConfirm={() => deleteChatById(chat.id)}
+                onConfirm={() => deleteChatById({ id: chat.id })}
                 onCancel={() => setShowDeleteConfirm(false)}
                 open={showDeleteConfirm}
             />

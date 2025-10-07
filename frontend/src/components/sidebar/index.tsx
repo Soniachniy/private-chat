@@ -10,7 +10,7 @@ import { useChatStore } from '@/stores/useChatStore';
 import { cn, getTimeRange } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import type { ChatInfo } from '@/types';
-import ChatItem from '@/components/chat/ChatItem';
+import ChatItem from './ChatItem';
 import UserMenu from './UserMenu';
 
 const LeftSidebar: React.FC = () => {
