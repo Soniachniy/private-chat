@@ -12,8 +12,8 @@ import { useAppInitialization } from './stores/useAppInitialization';
 
 import { useSettingsStore } from './stores/useSettingsStore';
 import { APP_ROUTES } from './pages/routes';
-import { useChats } from './hooks/useChat';
 import { useUserStore } from './stores/useUserStore';
+import { useChats } from './api/chat/queries';
 
 function App() {
 	const { isInitialized, isLoading: isAppLoading, initializeApp } = useAppInitialization();

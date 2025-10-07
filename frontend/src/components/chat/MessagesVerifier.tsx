@@ -5,7 +5,7 @@ import {
 	XCircleIcon,
 	ArrowTopRightOnSquareIcon
 } from '@heroicons/react/24/outline';
-import { nearAIClient, type MessageSignature } from '@/api/nearai';
+import { nearAIClient, type MessageSignature } from '@/api/nearai/client';
 import { useMessagesSignaturesStore } from '@/stores/useMessagesSignaturesStore';
 import VerifySignatureDialog from './VerifySignatureDialog';
 import type { Message } from '@/types';
@@ -66,7 +66,6 @@ const MessagesVerifier: React.FC<MessagesVerifierProps> = ({ history, chatId }) 
 
 			try {
 				const data = await nearAIClient.getMessageSignature(
-					token,
 					msg.model || 'gpt-3.5-turbo',
 					msg.chatCompletionId
 				);

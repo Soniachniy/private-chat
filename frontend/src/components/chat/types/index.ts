@@ -1,4 +1,4 @@
-import type { ModelAttestationReport } from "@/api/nearai";
+import type { ModelAttestationReport } from "@/api/nearai/client";
 
 export interface VerificationStatus {
 	loading: boolean;

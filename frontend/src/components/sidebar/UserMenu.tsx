@@ -15,19 +15,16 @@ import {
 import SettingsDialog from '@/components/common/dialogs/settings/SettingsDialog';
 import { useTranslation } from 'react-i18next';
 import ArchivedChatsModal from '@/components/common/dialogs/archived-chats/ArchivedChatsModal';
-import { useNavigate } from 'react-router';
-import { APP_ROUTES } from '@/pages/routes';
-import { authClient } from '@/api/auth';
+import { useSignOut } from '@/api/auth/queries';
 
 export const DropdownType = { Item: 'Item', Separator: 'Separator' } as const;
 
 const UserMenu: React.FC = () => {
-	const navigate = useNavigate();
 	const { t } = useTranslation('translation', { useSuspense: false });
 	const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 	const [isArchivedChatsOpen, setIsArchivedChatsOpen] = useState(false);
 	const user = useUserStore((state) => state.user);
-	const setUser = useUserStore((state) => state.setUser);
+	const { mutateAsync: signOut } = useSignOut();
 
 	const dropdownItems = useMemo(
 		() => [
@@ -44,18 +41,9 @@ const UserMenu: React.FC = () => {
 				action: () => setIsArchivedChatsOpen(true)
 			},
 			{ type: DropdownType.Separator },
-			{ title: t('Sign Out'), icon: <SignOutIcon />, type: DropdownType.Item, action: async () => {
-				try {
-					await authClient.signOut();
-					setUser(null);
-					localStorage.removeItem('token');
-					navigate(APP_ROUTES.AUTH);
-				} catch (error) {
-					console.error('Error signing out', error);
-				}
-			} }
+			{ title: t('Sign Out'), icon: <SignOutIcon />, type: DropdownType.Item, action: async () => await signOut() }
 		],
-		[t, navigate, setUser]
+		[t, signOut]
 	);
 
 	return (

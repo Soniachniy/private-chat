@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { useUserStore } from './useUserStore';
 import { useChatStore } from './useChatStore';
-import { openAIClient } from '@/api/openai';
-import { authClient } from '@/api/auth';
-import { configClient } from '@/api/config';
+import { authClient } from '@/api/auth/client';
+import { modelsClient } from '@/api/models/client';
+import { configClient } from '@/api/config/client';
 import { useConfigStore } from './useConfig';
 
 interface AppInitializationStore {
@@ -41,7 +41,7 @@ export const useAppInitialization = create<AppInitializationStore>((set, get) =>
 				try {
 					const [user, models] = await Promise.all([
 						authClient.getSessionUser(),
-						openAIClient.getModels()
+						modelsClient.getModels()
 					]);
 
 					useUserStore.getState().setUser(user);
